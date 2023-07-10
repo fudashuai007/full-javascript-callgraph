@@ -1,1 +1,1 @@
-jsvascript 静态分析工具
+javascript 静态分析工具
