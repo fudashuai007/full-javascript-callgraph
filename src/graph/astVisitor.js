@@ -27,7 +27,7 @@ function astFromFiles(files) {
 
   }
   init(ast);
-  collectPathData(ast)
+  nodePath2nodeMap(ast)
   return ast;
 }
 
@@ -42,14 +42,23 @@ function init(root) {
   root.attr.functions = [];
   // root.attr.functions = new Map()
   root.attr.calls = [];
+  root.attr.nodePath = []
 
   // root.attr.global.set(enclosingFile,new Map())
-  visit(root, function (nd, doVisit, parent, childProp) {
+  visitWithPath(root, function (nd, doVisit, parent, childProp) {
+
     if (nd.type && !nd.attr)
       nd['attr'] = {};
+    if (enclosingFunction)
+      nd.attr.enclosingFunction = enclosingFunction;
+    if (enclosingFile) {
+      nd.attr.enclosingFile = enclosingFile;
+    }
     let path = ''
     if (nd.type === 'Program') {
       path = 'global'
+      enclosingFile = nd.attr.filename;
+      root.attr.nodePath.push({ type: 'global', path: path, node: nd, name: 'global', file: nd.attr.filename })
 
     } else {
       if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
@@ -65,9 +74,13 @@ function init(root) {
           // 匿名函数调用
           case 'ParenthesizedExpression':
           case 'FunctionExpression':
+            // console.log(nd);
+            // debugger
+            nd.attr.callee = nd.callee.expression.id
             path = parent.attr.path
             break
         }
+        // nodePath.push({type:'node',path:path,node:nd})
         // nd.attr['callPath'] = callPath
         // console.log(nd);
         root.attr.calls.push(nd);
@@ -89,17 +102,8 @@ function init(root) {
 
     nd.attr['path'] = path
 
-    if (enclosingFunction)
-      nd.attr.enclosingFunction = enclosingFunction;
-    if (enclosingFile) {
-      nd.attr.enclosingFile = enclosingFile;
-    }
 
 
-    if (nd.type === 'Program') {
-      enclosingFile = nd.attr.filename;
-      root.attr.global = new Map()
-    }
     if (nd.type === 'FunctionExpression' && parent !== undefined && parent.type === 'Property') {
       if (!parent.computed) {
         if (parent.key.type === 'Identifier') {
@@ -150,42 +154,7 @@ function init(root) {
     if (nd.type === 'FunctionDeclaration' ||
       nd.type === 'FunctionExpression' ||
       nd.type === 'ArrowFunctionExpression') {
-      // // case 1: class method   
-      // if (parent.type === 'MethodDefinition') {
-      //   // let prev = parent
-      //   // while (!prev.id) prev = prev.parent
-      //   const path = nd.attr.path.trim(' ').split(' ')
-      //   // static function & function  class C { fun1() static func2()}  path:C==>func1   C-->func2
-      //   // if (parent.key.type !== 'PrivateName') {
-      //   //   root.attr.varias.set(path[path.length - 1] + '' + parent.key.name, nd)
-      //   // } else {
-      //   //   // private function  class C {  #func3()}  path: C-->func3
-      //   //   root.attr.varias.set(path[path.length - 1] + ' ' + parent.key.id.name, nd)
-      //   // }
-      // }
-      // // case 2: normal function write by VariableDeclarator
-      // if (parent.type === 'VariableDeclarator') {
-      //   const path = nd.attr.path.trim(' ').split(' ')
-      //   // root.attr.varias.set(path + parent.id.name, nd)
-      // }
-      // // case 3: assgin a function expression to a variable: let fun = function(){}
-
-      // if (nd.type === 'FunctionExpression' && parent.type === 'AssignmentExpression') {
-      //   const path = nd.attr.path.trim(' ').split(' ')
-      //   // root.attr.varias.set(path + parent.left.name, nd)
-      // }
-
-      // // case 4: function expression assigned to object property obj:{fun:function(){}}  path:obj-->fun
-      // if (nd.type === 'FunctionExpression' && parent.type === 'Property') {
-      //   // let prev = parent
-      //   // while (!(prev && prev.key)) prev = prev.parent
-      //   const path = nd.attr.path.trim(' ').split(' ')
-      //   // root.attr.varias.set(path[path.length - 1] + ' ' + parent.key.name, nd)
-      // }
-
-
-      // case 5: function expression in arguments
-      // case 6: function declaration
+      root.attr.nodePath.push({ type: 'function', path: nd.attr.path, node: nd, file: nd.attr.enclosingFile })
       // todo : 同个文件下的函数重载问题
       root.attr.functions.push(nd);
       nd.attr.parent = parent;
@@ -199,11 +168,6 @@ function init(root) {
       enclosingFunction = old_enclosingFunction;
       return false;
     }
-
-
-
-
-
   });
 }
 /**
@@ -215,7 +179,9 @@ function init(root) {
  */
 
 function handleRecusiveFindPath(node, path = '', root) {
-
+  // console.log(node);
+  // console.log(path);
+  // console.log(root);
   if (node.object) {
     return handleRecusiveFindPath(node.object) + ' ' + node.property.name || ''
   } else {
@@ -232,33 +198,59 @@ function handleRecusiveFindPath(node, path = '', root) {
   // path = node.object.name + node.property.name + path
   // return path
 }
-
-function collectPathData(ast) {
-
-  ast.attr.pathNode = new Map()
-  let pathNode = ast.attr.pathNode
-  ast.attr.functions.forEach(item => {
-    console.log(item);
-    const nodeInfo = {
-      type: isFunction(item) ? 'function' : 'variable',
-      info: item,
-      name: item.id.name
-    }
-    if (pathNode.has(item.attr.enclosingFile)) {
-      pathNode.get(item.attr.enclosingFile).set(nodeInfo.name,nodeInfo)
+/**
+ * 把收集到的函数声明路径转化为哈希链表 global a c -> global:map(a:map(c:node))
+ * @param {*} ast 
+ */
+function nodePath2nodeMap(ast) {
+  let nodeMap = new Map()
+  let nodePath = ast.attr.nodePath
+  nodePath.forEach(node => {
+    if (nodeMap.has(node.file)) {
+      nodeMap.set(node.file, nodeMap.get(node.file).concat(node))
     } else {
-      let nodeMap = new Map()
-      nodeMap.set(nodeInfo.name,nodeInfo)
-      pathNode.set(item.attr.enclosingFile, nodeMap)
-      
+      nodeMap.set(node.file, [].concat(node))
     }
-
   })
+  for (const [key, value] of nodeMap.entries()) {
+    let fileMap = new Map(), pathMap = new Map()
+    for (let i = 1; i < value.length; i++) {
+      let curPath = value[i].path.split(' ').filter(item => item !== undefined && item != '')
+      if (curPath[0] != 'global') curPath.unshift('global')
+      for (let j = 0; j < curPath.length; j++) {
+        // 跳过全局节点
+        if (curPath[j] === 'global') continue
+        if (j === 1) {
+          if (fileMap.has(curPath[j])) {
+          } else {
+            fileMap.set(curPath[j], new Map())
 
-  console.log(ast);
+          }
+          pathMap = fileMap.get(curPath[j])
+        }
+        else if (j != curPath.length - 1) {
+          if (!pathMap.has(curPath[j])) {
+            pathMap.set(curPath[j], new Map())
+          }
+          pathMap = pathMap.get(curPath[j])
+        }
+        else {
+          pathMap.set(curPath[j], value[i])
+        }
+
+      }
+
+    }
+    nodeMap.set(key, fileMap)
+    ast.attr.modeMap = nodeMap
+    delete ast.attr.nodePath
+  }
 }
+
+
+
 /* AST visitor */
-function visit(root, visitor) {
+function visitWithPath(root, visitor) {
   function doVisit(nd, parent, childProp) {
     if (!nd || typeof nd !== 'object')
       return;
@@ -270,10 +262,8 @@ function visit(root, visitor) {
       childProp === 'elements' ||
       childProp === 'specifiers' ||
       childProp === 'params') {
-      //  console.log( parent.attr.path);
       nd['attr'] = {}
       nd.attr['path'] = parent.attr.path
-      // console.log(nd);
     }
 
     if (childProp === 'arguments') {
@@ -307,7 +297,27 @@ function visit(root, visitor) {
 
   doVisit(root);
 }
+function visit(root, visitor) {
+  function doVisit(nd, parent, childProp) {
+    if (!nd || typeof nd !== 'object')
+      return;
 
+    if (nd.type) {
+      var res = visitor(nd, doVisit, parent, childProp);
+      if (res === false)
+        return;
+    }
+
+    for (var p in nd) {
+      // skip over magic properties
+      if (!nd.hasOwnProperty(p) || p.match(/^(range|loc|attr|comments|raw|path|type|start|end|sourceType|interpreter)$/))
+        continue;
+      doVisit(nd[p], nd, p);
+    }
+  }
+
+  doVisit(root);
+}
 
 /* AST visitor with state */
 function visitWithState(root, visitor) {
@@ -328,13 +338,14 @@ function visitWithState(root, visitor) {
 
     for (var p in nd) {
       // skip over magic properties
-      if (!nd.hasOwnProperty(p) || p.match(/^(range|loc|attr|comments||type)$/))
+      if (!nd.hasOwnProperty(p) || p.match(/^(range|loc|attr|comments|raw|path|type|start|end|sourceType|interpreter)$/))
         continue;
       doVisit(nd[p], nd, p);
     }
   }
 
   doVisit(root);
+
 }
 
 /* Simple version of UNIX basename. */
@@ -453,6 +464,8 @@ function preProcess(ast, fname) {
   let anonymousID = 0
   traverse(ast, {
     enter(path) {
+      // console.log(path);
+
       if (path.node.type === 'MethodDefinition' && path.node.key.type == 'PrivateName') {
         path.node.key['name'] = path.node.key.id.name
       }
@@ -478,6 +491,7 @@ function preProcess(ast, fname) {
           }
         }
       }
+      path.node.keyName= path.listKey
     },
   });
 }
