@@ -17,40 +17,6 @@
       }
     },
     "target": {
-      "label": "src\\test\\test.js-anonymous0-argumentKey0-<66,5>",
-      "file": "src\\test\\test.js",
-      "start": {
-        "row": 66,
-        "column": 5
-      },
-      "end": {
-        "row": 66,
-        "column": 17
-      },
-      "range": {
-        "start": 954,
-        "end": 966
-      }
-    }
-  },
-  {
-    "source": {
-      "label": "global",
-      "file": "src\\test\\test.js",
-      "start": {
-        "row": 66,
-        "column": 0
-      },
-      "end": {
-        "row": 66,
-        "column": 18
-      },
-      "range": {
-        "start": 949,
-        "end": 967
-      }
-    },
-    "target": {
       "label": "main",
       "file": "src\\test\\test.js",
       "start": {

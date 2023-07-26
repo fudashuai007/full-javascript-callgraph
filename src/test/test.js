@@ -56,14 +56,14 @@
 
 // a()
 
-function main (b) {
+function main (b,c) {
 	// console.log(args[]);
   // args[0]()
   b()
 }
 
 // function b(){}
-main(function(){});
+main(function(){},function(){});
 // let obj = {
 //   aa:function(){}
 // }

@@ -62,7 +62,7 @@ function init(root) {
 
     } else {
       if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
-
+        // console.log(nd);
         switch (nd.callee.type) {
           // 
           case 'Identifier':

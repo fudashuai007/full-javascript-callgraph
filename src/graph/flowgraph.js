@@ -31,8 +31,8 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 // 添加从成员表达式的对象顶点到第一个参数顶点的边。
                 if (nd.callee.type === 'MemberExpression')
                     flow_graph.addEdge(vertexFor(nd.callee.object), argVertex(nd, 0));
-                if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression')
-                    flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
+                // if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression')
+                //     flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
             // R8 FALL THROUGH
             case 'NewExpression':
                 // 添加从构造函数（callee）顶点到调用者顶点的边
@@ -40,7 +40,7 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 // console.log(nd);
                 //遍历调用表达式的参数，并在流图中添加从每个参数顶点到对应的参数顶点（按顺序递增 1）的边
                 for (var i = 0; i < nd.arguments.length; ++i)
-                    flow_graph.addEdge(vertexFor(nd.arguments[i]), argVertex(nd, i + 1));
+                    flow_graph.addEdge(vertexFor(nd.arguments[i]), argVertex(nd, i));
                 // 添加从调用结果顶点到调用表达式顶点的边
                 flow_graph.addEdge(resVertex(nd), vertexFor(nd));
                 break;
@@ -74,9 +74,9 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 console.log(nd);
                 if (nd.id) {
                     // 添加从函数值顶点到函数标识符顶点的边
-                    for (let i = 0; i < nd.params.length; i++) {
-                        flow_graph.addEdge(vertexFor(nd.params[i]), vertexFor(nd.id))
-                    }
+                    // for (let i = 0; i < nd.params.length; i++) {
+                    //     flow_graph.addEdge(vertexFor(nd.params[i]), funcVertex(nd))
+                    // }
                     flow_graph.addEdge(funcVertex(nd), vertexFor(nd.id));
                 }
 
@@ -86,13 +86,15 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             // R6 添加从函数值顶点到表达式顶点的边
             case 'FunctionExpression':
             case 'ArrowFunctionExpression':
-                // for (let i = 0; i < nd.params.length; i++) {
-                //     flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i]))
-                // }
+                flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
+                for (let i = 0; i < nd.params.length; i++) {
+                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i]))
+                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i+1]))
+                }
                 if (nd.attr.parent.type === 'ParenthesizedExpression') {
                     flow_graph.addEdge(funcVertex(nd), vertexFor(nd.id));
                 } else {
-                    flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
+                    // flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
 
                     if (nd.id) {
                         console.log(nd);
@@ -101,11 +103,17 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                         //     let path = nd.attr.path.split(' ')
                         //     let index = path.indexOf(nd.id.name)
                         //     let parentName = path[index-1]
-                        //     console.log(flow_graph.node_pairings['$'+parentName]);
-                        //     flow_graph.addEdge(vertexFor(nd.id),vertexFor(flow_graph.node_pairings['$'+parentName]))
+                        //    console.log(parentName);
+                        //     flow_graph.addEdge({
+                        //         type: 'GlobalVertex',
+                        //         name: parentName,
+                        //         attr: {
+                        //             pp: function () { return 'Glob(' + parentName + ')'; }
+                        //         }
+                        //     },varVertex(nd.id))
                         // }
                         flow_graph.addEdge(funcVertex(nd), varVertex(nd.id)); // 添加从函数值顶点到函数标识符顶点的边F
-
+                        
                     } // 如果有标识符
 
 
@@ -434,6 +442,19 @@ function argVertex(nd, i) {
             });
     }
 }
+
+// function argsVertex(nd){
+//     return nd.arguments[i - 1].attr.arg_vertex
+//             || (nd.arguments[i - 1].attr.arg_vertex = {
+//                 type: 'ArgumentVertex',
+//                 node: nd,
+//                 attr: {
+//                     pp: function () {
+//                         return 'Arg(' + astutil.ppPos(nd) + ', ' + i + ')';
+//                     }
+//                 }
+//             });
+// }
 
 // vertex representing result of a call
 function resVertex(nd) {
