@@ -31,8 +31,8 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 // 添加从成员表达式的对象顶点到第一个参数顶点的边。
                 if (nd.callee.type === 'MemberExpression')
                     flow_graph.addEdge(vertexFor(nd.callee.object), argVertex(nd, 0));
-                // if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression')
-                //     flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
+                if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression')
+                    flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
             // R8 FALL THROUGH
             case 'NewExpression':
                 // 添加从构造函数（callee）顶点到调用者顶点的边
