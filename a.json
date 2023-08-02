@@ -4,32 +4,33 @@
       "label": "global",
       "file": "src\\test\\test.js",
       "start": {
-        "row": 66,
+        "row": 132,
         "column": 0
       },
       "end": {
-        "row": 66,
-        "column": 18
+        "row": 132,
+        "column": 12
       },
       "range": {
-        "start": 949,
-        "end": 967
-      }
+        "start": 2067,
+        "end": 2079
+      },
+      "path": "global p toString"
     },
     "target": {
-      "label": "main",
-      "file": "src\\test\\test.js",
+      "label": "Object_prototype_toString",
+      "file": "Native",
       "start": {
-        "row": 59,
-        "column": 0
+        "row": null,
+        "column": null
       },
       "end": {
-        "row": 63,
-        "column": 1
+        "row": null,
+        "column": null
       },
       "range": {
-        "start": 855,
-        "end": 926
+        "start": null,
+        "end": null
       }
     }
   }

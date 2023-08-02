@@ -24,7 +24,7 @@
     //     "Object_isFrozen": "isFrozen",
     //     "Object_prototype_toLocaleString": "toLocaleString",
     //     "Object_prototype_valueOf": "valueOf",
-        // "Object_prototype_toString": "toString",
+        "Object_prototype_toString": "toString",
     //     "Object_prototype_hasOwnProperty": "hasOwnProperty",
     //     "Object_prototype_isPrototypeOf": "isPrototypeOf",
     //     "Object_prototype_propertyIsEnumerable": "propertyIsEnumerable",

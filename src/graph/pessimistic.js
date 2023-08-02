@@ -5,6 +5,7 @@ var graph = require('./graph'),
     callgraph = require('./callgraph');
 //给控制流图（Flow Graph）中添加一次性调用（one-shot call）的边
 function addOneShotEdges(ast, fg) {
+    console.log(ast.attr.functions);
     ast.attr.functions.forEach(function (fn) {
         var parent = fn.attr.parent,
             childProp = fn.attr.childProp;
@@ -23,10 +24,23 @@ function addOneShotEdges(ast, fg) {
             // 在控制流图中添加从函数返回顶点（flowgraph.retVertex(fn)）到调用结果顶点（flowgraph.resVertex(parent)）的边
             fg.addEdge(flowgraph.retVertex(fn), flowgraph.resVertex(parent));
         } else {
+            // console.log(fn);
             // not a one-shot closure
             // 在流图 fg 中添加从未知顶点（flowgraph.unknownVertex()）到每个形参顶点（flowgraph.parmVertex(fn, i)）的边
-            for (var i = 0, nparms = fn.params.length; i <= nparms; ++i)
-                fg.addEdge(flowgraph.unknownVertex(), flowgraph.parmVertex(fn, i))
+            for (var i = 0, nparms = fn.params.length; i <= nparms; ++i) {
+                // if (i == 0) {
+                    // console.log(fn);
+                    if(i==0){
+                        fg.addEdge(flowgraph.unknownVertex(), flowgraph.parmVertex(fn, i))
+                    }else{
+                        fg.addEdge(flowgraph.vertexFor(fn.id), flowgraph.parmVertex(fn, i))
+                    }
+                    
+                // } else 
+                    // fg.addEdge(flowgraph.funcVertex(fn), flowgraph.parmVertex(fn, i))
+                
+            }
+
             // 在流图 fg 中添加从函数返回顶点（flowgraph.retVertex(fn)）到未知顶点（flowgraph.unknownVertex()）的边
             fg.addEdge(flowgraph.retVertex(fn), flowgraph.unknownVertex());
         }
@@ -39,17 +53,8 @@ function addOneShotEdges(ast, fg) {
         if (!call.attr.oneshot)
             // 在流图 fg 中添加从每个参数顶点（flowgraph.argVertex(call, i)）到未知顶点（flowgraph.unknownVertex()）的边
             for (var i = 0; i <= call.arguments.length; ++i) {
-                // let path = call.attr.path.split(' ')
-                // let index = path.indexOf(call.callee.name)
-                // let parentName = path[index]
-                // fg.addEdge( flowgraph.argVertex(call, i),{
-                //     type: 'GlobalVertex',
-                //     name: call.callee.name,
-                //     attr: {
-                //         pp: function () { return 'Glob(' + call.callee.name + ')'; }
-                //     }
-                // })
-                fg.addEdge(flowgraph.argVertex(call, i), flowgraph.vertexFor(call.callee));
+         
+                    fg.addEdge(flowgraph.argVertex(call, i), flowgraph.unknownVertex());
                 // fg.addEdge(flowgraph.argVertex(call,i+1), flowgraph.vertexFor(call.callee));
             }
 

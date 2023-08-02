@@ -39,7 +39,7 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 flow_graph.addEdge(vertexFor(nd.callee), calleeVertex(nd));
                 // console.log(nd);
                 //遍历调用表达式的参数，并在流图中添加从每个参数顶点到对应的参数顶点（按顺序递增 1）的边
-                for (var i = 0; i < nd.arguments.length; ++i)
+                for (var i = 0; i <= nd.arguments.length; ++i)
                     flow_graph.addEdge(vertexFor(nd.arguments[i]), argVertex(nd, i));
                 // 添加从调用结果顶点到调用表达式顶点的边
                 flow_graph.addEdge(resVertex(nd), vertexFor(nd));
@@ -88,7 +88,7 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             case 'ArrowFunctionExpression':
                 flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
                 for (let i = 0; i < nd.params.length; i++) {
-                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i]))
+                    // flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i]))
                     flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i+1]))
                 }
                 if (nd.attr.parent.type === 'ParenthesizedExpression') {
@@ -210,6 +210,7 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
 
 /* Return the flow graph vertex corresponding to a given AST node. */
 function vertexFor(nd) {
+    if(!nd) return unknownVertex()
     var decl, body;
     switch (nd.type) {
         case 'Identifier':
@@ -389,6 +390,7 @@ function retVertex(fn) {
         || (fn.attr.ret_vertex = {
             type: 'ReturnVertex',
             node: fn,
+            // path
             attr: {
                 pp: function () {
                     return 'Ret(' + astutil.ppPos(fn) + ')';
@@ -410,7 +412,8 @@ function calleeVertex(nd) {
                 pp: function () {
                     return 'Callee(' + astutil.ppPos(nd) + ')';
                 }
-            }
+            },
+            visited:false
         });
 }
 

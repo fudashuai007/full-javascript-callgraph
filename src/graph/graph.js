@@ -99,10 +99,6 @@ Graph.prototype.addNode = function (nd) {
         return;
 
     this.node_pairings[cname] = nd;
-    // if (nd.type != 'NativeVertex' && nd.type!='PropertyVertex') {
-    //     console.log(this.node_pairings);
-    //     debugger
-    // }
     this.graph.addNode(cname);
 }
 

@@ -175,6 +175,12 @@ function reachability(graph) {
         tc.add(elem);
 
       return tc.has(dest_id);
+    },
+    removeReaches:function(source,target){
+      const sour_id = str2rid[nd2str(source)];
+      const targ_id = str2rid[nd2str(target)];
+      m[targ_id].delete(sour_id)
+      // m.splice(nodeStr,1)
     }
   };
 };

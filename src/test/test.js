@@ -18,7 +18,6 @@
 // function a() {
 // }
 
-// const { assertAccessor } = require("@babel/types");
 
 // case2
 // function a() {
@@ -27,20 +26,23 @@
 
 // case3
 // let p = {
-//   c:assertAccessor,
-//   obj: function () { },
-//   11: function () { },
-//   'a': function () { },
-//   d: function cc(){}
+//   // c:assertAccessor,
+//   // obj: function () { },
+//   // 11: function () { },
+//   // 'a': function () { },
+//   d: {
+//     cc:function(){}
+//   }
 // }
+// p.d.cc()
  
 // case4
 // (function(){})(function(){})
 // !function () {
 //   console.log(2123);
 // }();
-// ~(function(){ 
-//   alert('water'); 
+// ~(function(aa){ 
+//   aa('water'); 
 // })(function(){});//写法有点酷~ 
 // void function(){ 
 //   alert('water'); 
@@ -48,7 +50,7 @@
 // (function f(c) {
 //   c()
 //   //代码块
-// })(function(){})
+// })(function(){console.log(123);})
 
 // function a(){
   
@@ -56,14 +58,41 @@
 
 // a()
 
-function main (b,c) {
-	// console.log(args[]);
-  // args[0]()
-  b()
-}
 
-// function b(){}
-main(function(){},function(){});
+// let a = {
+//   toString:function(){}
+// }
+
+// a.toString()
+
+// let b = {
+//   toString:function(){}
+// }
+
+// b.toString()
+// 'aaa'.toString()
+// function main (b,c) {
+// 	// console.log(args[]);
+//   // args[0]()
+//   b()
+//   // c()
+// }
+
+// // function b(){}
+// main(function(){});
+// var obj = {
+//   randomMethod1: function () {
+//       return 42;
+//   },
+//   'randomMethod2': function () {
+//       return 'red';
+//   }
+// }
+
+// obj.randomMethod1();
+// obj.randomMethod2();
+
+
 // let obj = {
 //   aa:function(){}
 // }
@@ -93,12 +122,23 @@ main(function(){},function(){});
 //   b:function a(){}
 // }
 // function toString(){}
-// class P {
-//   toString(){}
-// }
+class P {
+  static toString(){
+    // console.log(123);
+  }
+  // toString(){
+  //   console.log(123);
+  // }
+}
 
-// let p = new P()
-// p.toString()
+class SonP extends P {
+  // toString(){
+  //   console.log(456);
+  // }
+}
+
+let p = new SonP()
+p.toString()
 
 
 

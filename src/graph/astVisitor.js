@@ -3,10 +3,9 @@ const parser = require('@babel/parser');
 const babel = require('@babel/core');
 const fs = require('fs');
 const traverse = require('@babel/traverse').default
-// const prep = require('./srcPreprocessor');
 const { trimHashbangPrep } = require('../utils/tool')
 const { errorLog } = require('../utils/log');
-// const { privateName } = require('@babel/types');
+const { nd2str } = require('./graph');
 
 
 /** gnerate AST from files */
@@ -20,13 +19,19 @@ function astFromFiles(files) {
   for (let file of files) {
     try {
       let src = fs.readFileSync(file, 'utf-8');
+      // console.log();
+      // ast.programs.set(file, buildProgram(file, src))
       ast.programs.push(buildProgram(file, src));
+
     } catch (error) {
-      errorLog(err, 'file:' + file + 'load error for:')
+      errorLog(error, 'file:' + file + 'load error for:')
     }
 
   }
-  init(ast);
+  init(ast)
+  // for (let [fileName, fileAst] of ast.programs.entries()) {
+  //   init(ast,fileAst);
+  // }
   nodePath2nodeMap(ast)
   return ast;
 }
@@ -62,11 +67,17 @@ function init(root) {
 
     } else {
       if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
-        // console.log(nd);
+        if (nd.type === 'NewExpression') {
+          // for(let i=0;i<f)
+        }
         switch (nd.callee.type) {
           // 
           case 'Identifier':
             path = parent.attr.path + ' ' + nd.callee.name
+            // let parentPath = parent.attr.path.split(' ')
+            // parentPath.splice(parentPath.length - 1, 1, nd.callee.name)
+            // //  console.log(parentPath.splice(parentPath.length - 1, 0, nd.callee.name));
+            // path = parentPath.join(' ')
             break;
           case 'MemberExpression':
             path = parent.attr.path + ' ' + handleRecusiveFindPath(nd.callee)
@@ -82,6 +93,8 @@ function init(root) {
         }
         // nodePath.push({type:'node',path:path,node:nd})
         // nd.attr['callPath'] = callPath
+        // console.log(nd);
+        nd.attr.parent = parent
         // console.log(nd);
         root.attr.calls.push(nd);
       }
@@ -491,7 +504,7 @@ function preProcess(ast, fname) {
           }
         }
       }
-      path.node.keyName= path.listKey
+      path.node.keyName = path.listKey
     },
   });
 }
