@@ -5,14 +5,11 @@ const fs = require('fs');
 const traverse = require('@babel/traverse').default
 const { trimHashbangPrep } = require('../utils/tool')
 const { errorLog } = require('../utils/log');
-const { nd2str } = require('./graph');
-
-
 /** gnerate AST from files */
 function astFromFiles(files) {
   const ast = {
     type: 'ProgramCollection',
-    programs: [],
+    programs: new Map(),
     attr: {}
   }
 
@@ -20,19 +17,19 @@ function astFromFiles(files) {
     try {
       let src = fs.readFileSync(file, 'utf-8');
       // console.log();
-      // ast.programs.set(file, buildProgram(file, src))
-      ast.programs.push(buildProgram(file, src));
+      ast.programs.set(file, buildProgram(file, src))
+      // ast.programs.push(buildProgram(file, src));
 
     } catch (error) {
       errorLog(error, 'file:' + file + 'load error for:')
     }
 
   }
-  init(ast)
-  // for (let [fileName, fileAst] of ast.programs.entries()) {
-  //   init(ast,fileAst);
-  // }
-  nodePath2nodeMap(ast)
+
+  for (let [fileName, fileAst] of ast.programs.entries()) {
+    init(fileName, fileAst);
+  }
+  // nodePath2nodeMap(ast)
   return ast;
 }
 
@@ -40,80 +37,96 @@ function astFromFiles(files) {
 /* Set up `attr` field that can be used to attach attributes to
  * nodes, and fill in `enclosingFunction` and `enclosingFile`
  * attributes. */
-function init(root) {
+function init(fname, root) {
   var enclosingFunction = null, enclosingFile = null;
 
   // global collections containing all functions and all call sites
-  root.attr.functions = [];
+  root.attr = {}
+  root.attr.functions = new Map()
+  // root.attr.functions = [];
   // root.attr.functions = new Map()
+  // root.attr.calls = [];
   root.attr.calls = [];
-  root.attr.nodePath = []
+  // root.attr.nodePath = []
 
   // root.attr.global.set(enclosingFile,new Map())
   visitWithPath(root, function (nd, doVisit, parent, childProp) {
-
     if (nd.type && !nd.attr)
       nd['attr'] = {};
+
     if (enclosingFunction)
       nd.attr.enclosingFunction = enclosingFunction;
     if (enclosingFile) {
       nd.attr.enclosingFile = enclosingFile;
     }
+    nd.attr.parent = parent
     let path = ''
     if (nd.type === 'Program') {
       path = 'global'
-      enclosingFile = nd.attr.filename;
-      root.attr.nodePath.push({ type: 'global', path: path, node: nd, name: 'global', file: nd.attr.filename })
+      enclosingFile = fname;
+      // root.attr.nodePath.push({ type: 'global', path: path, node: nd, name: 'global', file: nd.attr.filename })
 
     } else {
-      if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
-        if (nd.type === 'NewExpression') {
-          // for(let i=0;i<f)
+
+      if (nd.type === 'Property' || nd.type === 'MethodDefinition') {
+        path = parent.attr.path + (nd.key && nd.key.name ? ' ' + nd.key.name : ' ' + nd.key.value)
+      } else {
+        // 处理对象属性的赋值是具名函数的情况:obj:{a:function aa(){}}
+        if (nd.type === 'FunctionExpression' && (childProp === 'value' || childProp === 'init')) {
+          path = parent.attr.path
+        } else {
+          // try {
+          path = parent.attr.path + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
+          // path = parent.attr.path?parent.attr.path:'' + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
+          // }
+          // catch (e) {
+          //   console.log(e);
+
         }
+
+
+      }
+
+      if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
+
+
+
         switch (nd.callee.type) {
           // 
           case 'Identifier':
-            path = parent.attr.path + ' ' + nd.callee.name
-            // let parentPath = parent.attr.path.split(' ')
-            // parentPath.splice(parentPath.length - 1, 1, nd.callee.name)
-            // //  console.log(parentPath.splice(parentPath.length - 1, 0, nd.callee.name));
-            // path = parentPath.join(' ')
+            path = nd.callee.name
             break;
           case 'MemberExpression':
-            path = parent.attr.path + ' ' + handleRecusiveFindPath(nd.callee)
+            // console.log(nd.loc.start);
+            // console.log(parent);
+            // let pNode =parent
+            // while(pNode.type=='MemberExpression') {
+            //   pNode = pNode.attr.parent
+            // }
+            // while(parent.)
+            // if(parent.type!='MemberExpression'){
+            path = handleRecusiveFindPath(nd.callee, nd.callee.property.name)
             break;
+          // }else{
+          //   path =handleRecusiveFindPath(nd.callee, nd.callee.property.name)
+          // }
+
           // 匿名函数调用
           case 'ParenthesizedExpression':
           case 'FunctionExpression':
-            // console.log(nd);
-            // debugger
             nd.attr.callee = nd.callee.expression.id
             path = parent.attr.path
             break
         }
-        // nodePath.push({type:'node',path:path,node:nd})
-        // nd.attr['callPath'] = callPath
-        // console.log(nd);
+
         nd.attr.parent = parent
-        // console.log(nd);
-        root.attr.calls.push(nd);
-      }
-      else {
-        if (nd.type === 'Property' || nd.type === 'MethodDefinition') {
-          path = parent.attr.path + (nd.key && nd.key.name ? ' ' + nd.key.name : ' ' + nd.key.value)
-        } else {
-          // 处理对象属性的赋值是具名函数的情况:obj:{a:function aa(){}}
-          if (nd.type === 'FunctionExpression' && (childProp === 'value' || childProp === 'init')) {
-            path = parent.attr.path
-          } else
-            path = parent.attr.path + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
-        }
-
-
+        // root.attr.calls.push(nd);
       }
     }
 
     nd.attr['path'] = path
+
+
 
 
 
@@ -148,10 +161,14 @@ function init(root) {
       }
     }
 
-    if (nd.type === 'MethodDefinition')
+    if (nd.type === 'MethodDefinition') {
       if (!nd.computed) {
         if (nd.key.type === 'Identifier' || nd.key.type === 'PrivateName') {
           nd.value.id = nd.key;
+          if (nd.static) {
+            nd.value['static'] = true
+          }
+
         }
         else if (nd.key.type === 'Literal') {
           // this case is covered by test case: tests/unexpected/stringiterator.truth
@@ -164,12 +181,32 @@ function init(root) {
       else {
         console.log("WARNING: Computed property for method definition, not yet supported.");
       }
+    }
+
     if (nd.type === 'FunctionDeclaration' ||
       nd.type === 'FunctionExpression' ||
       nd.type === 'ArrowFunctionExpression') {
-      root.attr.nodePath.push({ type: 'function', path: nd.attr.path, node: nd, file: nd.attr.enclosingFile })
+      // console.log(nd);
+      // console.log(parent);
+
+      // for(let i=0;i<nd.params.length;i++){
+      //   for(let j=0;j<nd.body.body.length;j++){
+      //     if(nd.params[i].name==nd.body.body)
+      //   }
+      // }
+      // root.attr.nodePath.push({ type: 'function', path: nd.attr.path, node: nd, file: nd.attr.enclosingFile })
       // todo : 同个文件下的函数重载问题
-      root.attr.functions.push(nd);
+      if (nd.id && nd.id.name) {
+        if (nd['static']) { // 类中静态方法不加入子级类中
+          root.attr.functions.set('static ' + nd.id.name, nd);
+        } else {
+          root.attr.functions.set(nd.id.name, nd);
+        }
+
+      } else {
+        root.attr.functions.set(path.split(' ').pop(), nd);
+      }
+
       nd.attr.parent = parent;
       // nd.attr.originCode = print(nd)
       nd.attr.childProp = childProp;
@@ -181,35 +218,69 @@ function init(root) {
       enclosingFunction = old_enclosingFunction;
       return false;
     }
+
+    if (nd.type === 'CallExpression' || nd.type === 'NewExpression') {
+
+      if (nd.type === 'NewExpression') {
+        if (nd.callee.type === 'Identifier') {
+
+          [...root.attr.functions.values()].forEach(func => {
+            let paths = func.attr.path.split(' ')
+            let pathIndex = paths.indexOf(nd.callee.name)
+            if (pathIndex != -1 && !func.static) {
+              paths.splice(pathIndex + 1, 0, parent.id.name)
+              func.attr.path = paths.join(' ')
+            }
+
+          })
+        }
+
+
+      }
+      root.attr.calls.push(nd);
+    }
   });
 }
 /**
  * 
- * @param {node} node node.callee
- * @param {path} path 
- * @param { root} root  top node
+ * @param {node} node  CallExpression  callee
  * @returns 
  */
 
-function handleRecusiveFindPath(node, path = '', root) {
-  // console.log(node);
-  // console.log(path);
-  // console.log(root);
+function handleRecusiveFindPath(node, path) {
+  if (!node) return path
   if (node.object) {
-    return handleRecusiveFindPath(node.object) + ' ' + node.property.name || ''
-  } else {
-    return node.name
+    if (node.object.type === 'CallExpression') {
+      return handleRecusiveFindPath(node.object.callee, node.property.name)
+    } else if (node.object.type === 'MemberExpression') {
+      // console.log(node.object);
+      if (node.object.object.type === 'CallExpression') {
+        return handleRecusiveFindPath(node.object, node.object.property.name) + ' ' + path
+      } else {
+        return node.object.object.name + ' ' + (node.object.property.name?node.object.property.name+' ':'') + path
+      }
+
+    }
+    else {
+      return node.object.name + ' ' + path
+    }
   }
-
   // return path
-  // if (node.object.type === 'MemberExpression') {
-
-  //   handleRecusiveFindPath(node.object)
-  // } else if (node.object.type === 'CallExpression') {
+  // if(node.type==='Identifier'){
+  //   console.log(node);
+  // }
+  // if (node.object && node.object.type !== 'Identifier') {
+  //   return handleRecusiveFindPath(node.object.callee, path)
+  // } else {
+  //   if (node.object) {
+  //     return node.object.name + ' ' + path
+  //   } else {
+  //     return (node.name || '') + path
+  //   }
 
   // }
-  // path = node.object.name + node.property.name + path
-  // return path
+
+
 }
 /**
  * 把收集到的函数声明路径转化为哈希链表 global a c -> global:map(a:map(c:node))
@@ -260,7 +331,18 @@ function nodePath2nodeMap(ast) {
   }
 }
 
+function mergeAst(ast) {
 
+  ast.attr.functions = [];
+  ast.attr.calls = [];
+  [...ast.programs.values()].forEach(item => {
+    ast.attr.functions = ast.attr.functions.concat([...item.attr.functions.values()])
+    ast.attr.calls = ast.attr.calls.concat(item.attr.calls)
+
+  });
+  ast.programs = [...ast.programs.values()];
+  // console.log(ast);
+}
 
 /* AST visitor */
 function visitWithPath(root, visitor) {
@@ -274,6 +356,8 @@ function visitWithPath(root, visitor) {
       childProp === 'decorators' ||
       childProp === 'elements' ||
       childProp === 'specifiers' ||
+      childProp === 'expressions' ||
+      childProp === 'quasis' ||
       childProp === 'params') {
       nd['attr'] = {}
       nd.attr['path'] = parent.attr.path
@@ -397,7 +481,7 @@ function encFuncName(encFunc) {
     return "anon";
   // privateMethod
   else if (!encFunc.id.name)
-    return encFunc.id.id.name
+    return encFunc.id.id ? encFunc.id.id.name : 'anon'
   return encFunc.id.name
 }
 
@@ -477,14 +561,22 @@ function preProcess(ast, fname) {
   let anonymousID = 0
   traverse(ast, {
     enter(path) {
-      // console.log(path);
-
       if (path.node.type === 'MethodDefinition' && path.node.key.type == 'PrivateName') {
         path.node.key['name'] = path.node.key.id.name
       }
       if ((path.type === 'FunctionExpression' ||
         path.type === 'ArrowFunctionExpression') && !path.node.id) {
-        if (path.parentKey !== 'init') { // 忽略函数赋值和对象属性的值为函数表达式的情况，因为这两类函数都是有名字的函数
+
+        if (path.key === 'right') {
+          path.node.id = {
+            type: 'Identifier',
+            name: path.parent.left.name,
+            range: path.node.range,
+            loc: path.node.loc,
+            functionType: path.type
+          };
+        }
+        else if (path.parentKey !== 'init') { // 忽略函数赋值和对象属性的值为函数表达式的情况，因为这两类函数都是有名字的函数
           if (path.parentKey !== 'arguments') {
             path.node.id = {
               type: 'Identifier',
@@ -508,7 +600,7 @@ function preProcess(ast, fname) {
     },
   });
 }
-/* Returns an ast node of type 'Program'
+/* 将文件转成ast
 */
 function parse(src, fname) {
   const ast = parser.parse(src, {
@@ -678,92 +770,6 @@ function isCallTo(nd, fn_name) {
   return callee.name === fn_name
 }
 
-/*
-Args:
-       fn - an ast node representing a FunctionDeclaration
- 
-Returns:
-    A list containing all of the ReturnStatement nodes' values in fn's body
- 
-Relevant docs:
- 
-    interface FunctionDeclaration {
-        type: 'FunctionDeclaration';
-        id: Identifier | null;
-        params: FunctionParameter[];
-        body: BlockStatement;
-        generator: boolean;
-        async: boolean;
-        expression: false;
-    }
- 
-    interface BlockStatement {
-        type: 'BlockStatement';
-        body: StatementListItem[];
-    }
- 
-    interface ReturnStatement {
-        type: 'ReturnStatement';
-        argument: Expression | null;
-    }
-*/
-function getReturnValues(fn) {
-  let lst = [];
-  let fn_body = fn.body;
-  /* There're two cases here:
-  Case 1. fn_body is of type 'BlockStatement'
-      this is the most common case, for example
-      const f = () => {return 1;};
-  Case 2. fn_body is not of type 'BlockStatement'
-      this case is covered by test case:
-          tests/import-export/define/arrow-func-no-block-statement-require.truth
-      const f = () => 1;
- 
-      Esprima output:
-      {
-          "type": "Program",
-          "body": [
-              {
-                  "type": "VariableDeclaration",
-                  "declarations": [
-                      {
-                          "type": "VariableDeclarator",
-                          "id": {
-                              "type": "Identifier",
-                              "name": "f"
-                          },
-                          "init": {
-                              "type": "ArrowFunctionExpression",
-                              "id": null,
-                              "params": [],
-                              "body": {
-                                  "type": "Literal",
-                                  "value": 1,
-                                  "raw": "1"
-                              },
-                              "generator": false,
-                              "expression": true,
-                              "async": false
-                          }
-                      }
-                  ],
-                  "kind": "const"
-              }
-          ],
-          "sourceType": "script"
-      }
-  */
-  if (fn_body.type === 'BlockStatement') {
-    let block = fn_body.body;
-    for (var i = 0; i < block.length; i++)
-      if (block[i].type === 'ReturnStatement')
-        lst.push(block[i].argument);
-  }
-  else {
-    lst.push(fn_body);
-  }
-  return lst;
-}
 
 /*
 Args:
@@ -783,6 +789,7 @@ function isFunction(nd) {
 module.exports.visit = visit;
 module.exports.visitWithState = visitWithState;
 module.exports.init = init;
+module.exports.mergeAst = mergeAst;
 module.exports.ppPos = ppPos;
 module.exports.funcname = funcname;
 module.exports.encFuncName = encFuncName;
@@ -793,6 +800,5 @@ module.exports.getFunctions = getFunctions;
 module.exports.isAnon = isAnon;
 module.exports.isModuleExports = isModuleExports;
 module.exports.isCallTo = isCallTo;
-module.exports.getReturnValues = getReturnValues;
 module.exports.isFunction = isFunction;
 module.exports.cf = cf;

@@ -2,20 +2,631 @@
   {
     "source": {
       "label": "global",
-      "file": "src\\test\\test.js",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
       "start": {
-        "row": 132,
+        "row": 12,
+        "column": 18
+      },
+      "end": {
+        "row": 21,
+        "column": 4
+      },
+      "range": {
+        "start": 260,
+        "end": 517
+      },
+      "path": "global"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\browser.js-anonymous0-<12,19>",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 12,
+        "column": 19
+      },
+      "end": {
+        "row": 21,
+        "column": 1
+      },
+      "range": {
+        "start": 261,
+        "end": 514
+      },
+      "path": "global src\\test\\Data\\debug\\src\\browser.js-anonymous0-<12,19>"
+    }
+  },
+  {
+    "source": {
+      "label": "debug",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 91,
+        "column": 13
+      },
+      "end": {
+        "row": 107,
+        "column": 5
+      },
+      "range": {
+        "start": 2204,
+        "end": 2726
+      },
+      "path": "args undefined replace"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\browser.js-anonymous2-argumentKey1-<166,32>",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 166,
+        "column": 32
+      },
+      "end": {
+        "row": 176,
+        "column": 2
+      },
+      "range": {
+        "start": 4062,
+        "end": 4272
+      },
+      "path": "args undefined replace src\\test\\Data\\debug\\src\\browser.js-anonymous2-argumentKey1-<166,32>"
+    }
+  },
+  {
+    "source": {
+      "label": "global",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 11,
+        "column": 18
+      },
+      "end": {
+        "row": 11,
+        "column": 32
+      },
+      "range": {
+        "start": 225,
+        "end": 239
+      },
+      "path": "localstorage"
+    },
+    "target": {
+      "label": "localstorage",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 244,
         "column": 0
       },
       "end": {
-        "row": 132,
-        "column": 12
+        "row": 253,
+        "column": 1
       },
       "range": {
-        "start": 2067,
-        "end": 2079
+        "start": 5627,
+        "end": 5941
       },
-      "path": "global p toString"
+      "path": "global localstorage"
+    }
+  },
+  {
+    "source": {
+      "label": "setup",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 17,
+        "column": 1
+      },
+      "end": {
+        "row": 19,
+        "column": 3
+      },
+      "range": {
+        "start": 413,
+        "end": 483
+      },
+      "path": "Object forEach"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\common.js-anonymous0-argumentKey0-<17,26>",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 17,
+        "column": 26
+      },
+      "end": {
+        "row": 19,
+        "column": 2
+      },
+      "range": {
+        "start": 438,
+        "end": 482
+      },
+      "path": "Object forEach src\\test\\Data\\debug\\src\\common.js-anonymous0-argumentKey0-<17,26>"
+    }
+  },
+  {
+    "source": {
+      "label": "extend",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 150,
+        "column": 19
+      },
+      "end": {
+        "row": 150,
+        "column": 113
+      },
+      "range": {
+        "start": 3837,
+        "end": 3931
+      },
+      "path": "createDebug"
+    },
+    "target": {
+      "label": "createDebug",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 60,
+        "column": 1
+      },
+      "end": {
+        "row": 147,
+        "column": 2
+      },
+      "range": {
+        "start": 1519,
+        "end": 3772
+      },
+      "path": "global setup createDebug"
+    }
+  },
+  {
+    "source": {
+      "label": "formatArgs",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 166,
+        "column": 1
+      },
+      "end": {
+        "row": 176,
+        "column": 3
+      },
+      "range": {
+        "start": 4031,
+        "end": 4273
+      },
+      "path": "args undefined replace"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\common.js-anonymous1-argumentKey1-<91,46>",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 91,
+        "column": 46
+      },
+      "end": {
+        "row": 107,
+        "column": 4
+      },
+      "range": {
+        "start": 2237,
+        "end": 2725
+      },
+      "path": "args undefined replace src\\test\\Data\\debug\\src\\common.js-anonymous1-argumentKey1-<91,46>"
+    }
+  },
+  {
+    "source": {
+      "label": "disable",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 198,
+        "column": 6
+      },
+      "end": {
+        "row": 198,
+        "column": 40
+      },
+      "range": {
+        "start": 4984,
+        "end": 5018
+      },
+      "path": "createDebug skips map"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\common.js-anonymous2-argumentKey0-<198,45>",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 198,
+        "column": 45
+      },
+      "end": {
+        "row": 198,
+        "column": 73
+      },
+      "range": {
+        "start": 5023,
+        "end": 5051
+      },
+      "path": "createDebug skips map src\\test\\Data\\debug\\src\\common.js-anonymous2-argumentKey0-<198,45>"
+    }
+  },
+  {
+    "source": {
+      "label": "global",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 18,
+        "column": 18
+      },
+      "end": {
+        "row": 21,
+        "column": 1
+      },
+      "range": {
+        "start": 334,
+        "end": 502
+      },
+      "path": "util deprecate"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous0-argumentKey0-<19,1>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 19,
+        "column": 1
+      },
+      "end": {
+        "row": 19,
+        "column": 9
+      },
+      "range": {
+        "start": 352,
+        "end": 360
+      },
+      "path": "util deprecate src\\test\\Data\\debug\\src\\node.js-anonymous0-argumentKey0-<19,1>"
+    }
+  },
+  {
+    "source": {
+      "label": "global",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 124,
+        "column": 22
+      },
+      "end": {
+        "row": 126,
+        "column": 2
+      },
+      "range": {
+        "start": 1870,
+        "end": 1945
+      },
+      "path": "Object filter"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 124,
+        "column": 54
+      },
+      "end": {
+        "row": 126,
+        "column": 1
+      },
+      "range": {
+        "start": 1902,
+        "end": 1944
+      },
+      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>"
+    }
+  },
+  {
+    "source": {
+      "label": "global",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 124,
+        "column": 22
+      },
+      "end": {
+        "row": 149,
+        "column": 6
+      },
+      "range": {
+        "start": 1870,
+        "end": 2439
+      },
+      "path": "Object filter"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 126,
+        "column": 10
+      },
+      "end": {
+        "row": 149,
+        "column": 1
+      },
+      "range": {
+        "start": 1953,
+        "end": 2434
+      },
+      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>"
+    }
+  },
+  {
+    "source": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 128,
+        "column": 14
+      },
+      "end": {
+        "row": 133,
+        "column": 4
+      },
+      "range": {
+        "start": 2000,
+        "end": 2109
+      },
+      "path": "key toLowerCase"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous3-argumentKey1-<131,24>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 131,
+        "column": 24
+      },
+      "end": {
+        "row": 133,
+        "column": 3
+      },
+      "range": {
+        "start": 2064,
+        "end": 2108
+      },
+      "path": "key toLowerCase src\\test\\Data\\debug\\src\\node.js-anonymous3-argumentKey1-<131,24>"
+    }
+  },
+  {
+    "source": {
+      "label": "formatArgs",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 178,
+        "column": 12
+      },
+      "end": {
+        "row": 178,
+        "column": 21
+      },
+      "range": {
+        "start": 3147,
+        "end": 3156
+      },
+      "path": "getDate"
+    },
+    "target": {
+      "label": "getDate",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 182,
+        "column": 0
+      },
+      "end": {
+        "row": 187,
+        "column": 1
+      },
+      "range": {
+        "start": 3191,
+        "end": 3311
+      },
+      "path": "global getDate"
+    }
+  },
+  {
+    "source": {
+      "label": "anon",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 250,
+        "column": 8
+      },
+      "end": {
+        "row": 252,
+        "column": 25
+      },
+      "range": {
+        "start": 4647,
+        "end": 4723
+      },
+      "path": "util split"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous4-argumentKey0-<252,7>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 252,
+        "column": 7
+      },
+      "end": {
+        "row": 252,
+        "column": 24
+      },
+      "range": {
+        "start": 4705,
+        "end": 4722
+      },
+      "path": "util split src\\test\\Data\\debug\\src\\node.js-anonymous4-argumentKey0-<252,7>"
+    }
+  },
+  {
+    "source": {
+      "label": "testSoundness",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 25,
+        "column": 52
+      },
+      "end": {
+        "row": 25,
+        "column": 133
+      },
+      "range": {
+        "start": 1746,
+        "end": 1827
+      },
+      "path": "Array map"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\statistic.js-anonymous0-argumentKey0-<25,84>",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 25,
+        "column": 84
+      },
+      "end": {
+        "row": 25,
+        "column": 132
+      },
+      "range": {
+        "start": 1778,
+        "end": 1826
+      },
+      "path": "Array map src\\test\\Data\\debug\\src\\statistic.js-anonymous0-argumentKey0-<25,84>"
+    }
+  },
+  {
+    "source": {
+      "label": "testSoundness",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 26,
+        "column": 57
+      },
+      "end": {
+        "row": 26,
+        "column": 132
+      },
+      "range": {
+        "start": 1898,
+        "end": 1973
+      },
+      "path": "f artificialFunctions map"
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\statistic.js-anonymous1-argumentKey0-<26,83>",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 26,
+        "column": 83
+      },
+      "end": {
+        "row": 26,
+        "column": 131
+      },
+      "range": {
+        "start": 1924,
+        "end": 1972
+      },
+      "path": "f artificialFunctions map src\\test\\Data\\debug\\src\\statistic.js-anonymous1-argumentKey0-<26,83>"
+    }
+  },
+  {
+    "source": {
+      "label": "testSoundness",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 84,
+        "column": 23
+      },
+      "end": {
+        "row": 84,
+        "column": 54
+      },
+      "range": {
+        "start": 4948,
+        "end": 4979
+      },
+      "path": "findRepresentativeLocation"
+    },
+    "target": {
+      "label": "findRepresentativeLocation",
+      "file": "src\\test\\Data\\debug\\src\\statistic.js",
+      "start": {
+        "row": 49,
+        "column": 4
+      },
+      "end": {
+        "row": 55,
+        "column": 5
+      },
+      "range": {
+        "start": 3057,
+        "end": 3355
+      },
+      "path": "global testSoundness findRepresentativeLocation"
+    }
+  },
+  {
+    "source": {
+      "label": "toNamespace",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 243,
+        "column": 17
+      },
+      "end": {
+        "row": 243,
+        "column": 34
+      },
+      "range": {
+        "start": 5885,
+        "end": 5902
+      },
+      "path": "regexp toString"
+    },
+    "target": {
+      "label": "Object_prototype_toString",
+      "file": "Native",
+      "start": {
+        "row": null,
+        "column": null
+      },
+      "end": {
+        "row": null,
+        "column": null
+      },
+      "range": {
+        "start": null,
+        "end": null
+      }
+    }
+  },
+  {
+    "source": {
+      "label": "toNamespace",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 242,
+        "column": 9
+      },
+      "end": {
+        "row": 242,
+        "column": 26
+      },
+      "range": {
+        "start": 5849,
+        "end": 5866
+      },
+      "path": "regexp toString"
     },
     "target": {
       "label": "Object_prototype_toString",

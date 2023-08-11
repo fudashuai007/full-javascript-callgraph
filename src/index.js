@@ -7,8 +7,9 @@ const binding = require('./graph/binding')
 const pessimistic = require('./graph/pessimistic')
 const fs = require('fs')
 const JSONStream = require('JSONStream');
+//
 const options = {
-  analysisDir: 'src/test',
+  analysisDir: 'src/test/test',
   output: ['a.json'],
   time: true,
   count: true,
@@ -25,7 +26,7 @@ program
 function addNode(edge, v) {
   if (v.type === 'CalleeVertex') {
     let nd = v.call;
-    
+
     edge.label = astVisitor.encFuncName(nd.attr.enclosingFunction);
     edge.file = nd.attr.enclosingFile;
     edge.path = nd.attr.path;
@@ -101,22 +102,30 @@ function main() {
   console.timeEnd("parsing  ");
 
   console.time("bindings ");
-  binding.addBindings(ast);
+  for (let fileAst of ast.programs.values()) {
+    binding.addBindings(fileAst);
+  }
   console.timeEnd("bindings ");
+
+
   console.time("callgraph ");
-  cg = pessimistic.buildCallGraph(ast);
+  astVisitor.mergeAst(ast)
+  // var cgs = []
+  // for (let fileAst of ast.programs.values()) {
+  //   cgs.push(pessimistic.buildCallGraph(fileAst))
+  // }
+  cg = pessimistic.buildCallGraph(ast)
+
   console.timeEnd("callgraph ");
 
   let result = [];
+  // for (let i = 0; i < cgs.length; i++) {
   cg.edges.iter(function (call, fn) {
     let edge = buildBinding(call, fn)
-    // if(edge.source.label ===edge.target.label) continue
-    // if (result.some(item => item.target.label === edge.target.label && item.source.label === 'global' && item.source.path!='global')) {
-    //   let preEdgeIndex = result.findIndex(item => item.target.label === edge.target.label && item.source.label === 'global')
-    //   result.splice(preEdgeIndex, 1)
-    // }
     result.push(edge);
   });
+  // }
+
 
   // console.log(options.output);
   // result = result.filter(item => item.source.label != item.target.label)

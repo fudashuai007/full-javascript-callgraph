@@ -36,7 +36,13 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             // R8 FALL THROUGH
             case 'NewExpression':
                 // 添加从构造函数（callee）顶点到调用者顶点的边
-                flow_graph.addEdge(vertexFor(nd.callee), calleeVertex(nd));
+                const startVertex = vertexFor(nd.callee)
+                if (startVertex.paramIndex != undefined) {
+                    flow_graph.addEdge(startVertex, calleeVertex(nd, startVertex.paramIndex));
+                } else {
+                    flow_graph.addEdge(startVertex, calleeVertex(nd));
+                }
+
                 // console.log(nd);
                 //遍历调用表达式的参数，并在流图中添加从每个参数顶点到对应的参数顶点（按顺序递增 1）的边
                 for (var i = 0; i <= nd.arguments.length; ++i)
@@ -71,7 +77,6 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 break;
 
             case 'FunctionDeclaration':
-                console.log(nd);
                 if (nd.id) {
                     // 添加从函数值顶点到函数标识符顶点的边
                     // for (let i = 0; i < nd.params.length; i++) {
@@ -88,36 +93,14 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             case 'ArrowFunctionExpression':
                 flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
                 for (let i = 0; i < nd.params.length; i++) {
-                    // flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i]))
-                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i+1]))
+                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i + 1]))
                 }
                 if (nd.attr.parent.type === 'ParenthesizedExpression') {
                     flow_graph.addEdge(funcVertex(nd), vertexFor(nd.id));
                 } else {
-                    // flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
-
                     if (nd.id) {
-                        console.log(nd);
-
-                        // if(nd.keyName==='arguments'){
-                        //     let path = nd.attr.path.split(' ')
-                        //     let index = path.indexOf(nd.id.name)
-                        //     let parentName = path[index-1]
-                        //    console.log(parentName);
-                        //     flow_graph.addEdge({
-                        //         type: 'GlobalVertex',
-                        //         name: parentName,
-                        //         attr: {
-                        //             pp: function () { return 'Glob(' + parentName + ')'; }
-                        //         }
-                        //     },varVertex(nd.id))
-                        // }
                         flow_graph.addEdge(funcVertex(nd), varVertex(nd.id)); // 添加从函数值顶点到函数标识符顶点的边F
-                        
-                    } // 如果有标识符
-
-
-                    // flow_graph.addEdge(varVertex(nd.id),exprVertex(nd))
+                    }
                 }
 
                 break;
@@ -209,8 +192,8 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
 }
 
 /* Return the flow graph vertex corresponding to a given AST node. */
-function vertexFor(nd) {
-    if(!nd) return unknownVertex()
+function vertexFor(nd, index) {
+    if (!nd) return unknownVertex()
     var decl, body;
     switch (nd.type) {
         case 'Identifier':
@@ -218,7 +201,9 @@ function vertexFor(nd) {
             // console.log(nd.attr.scope);
             if (!nd.attr.scope)
                 decl = nd.attr.scope.get(nd.name);
-            return decl && !decl.attr.scope.global  ? varVertex(decl) : globVertex(nd);
+            return decl && !decl.attr.scope.global ?
+                varVertex(decl) : index != undefined ?
+                    globParamsVertex(nd, index) : globVertex(nd);
         case 'ThisExpression':
             // 'this' is treated like a variable
             decl = nd.attr.scope.get('this');
@@ -316,6 +301,28 @@ function globVertex(nd) {
     });
 }
 
+
+
+function globParamsVertex(nd, index) {
+    let gp;
+    if (nd.type === 'Identifier')
+        gp = nd.name;
+    else if (nd.type === 'Literal')
+        // this case handles array, property field: 0, 1, 2...
+        gp = nd.value + "";
+    else
+        throw new Error("invalid global vertex");
+
+    return globVertices.get(gp, {
+        type: 'GlobalVertex',
+        paramIndex: index,
+        name: gp,
+        attr: {
+            pp: function () { return 'Glob(' + gp + ')'; }
+        }
+    });
+}
+
 // vertices representing well-known native functions
 var nativeVertices = new symtab.Symtab();
 
@@ -376,7 +383,7 @@ function parmVertex(fn, i) {
     } else {
         // In ES6, fn.params[i - 1] might not be an Identifier
         // vertex = varVertex(fn.params[i - 1]);
-        vertex = vertexFor(fn.params[i - 1]);
+        vertex = vertexFor(fn.params[i - 1], i - 1);
     }
     return vertex;
 }
@@ -400,11 +407,10 @@ function retVertex(fn) {
 }
 
 // vertex representing callee at a call site
-function calleeVertex(nd) {
+function calleeVertex(nd, index) {
     if (nd.type !== 'CallExpression' && nd.type !== 'NewExpression')
         throw new Error("invalid callee vertex");
-
-    return nd.attr.callee_vertex
+    let resultVertex = nd.attr.callee_vertex
         || (nd.attr.callee_vertex = {
             type: 'CalleeVertex',
             call: nd,
@@ -413,8 +419,12 @@ function calleeVertex(nd) {
                     return 'Callee(' + astutil.ppPos(nd) + ')';
                 }
             },
-            visited:false
+            visited: false
         });
+    if (index != undefined) {
+        resultVertex['paramIndex'] = index
+    }
+    return resultVertex
 }
 
 // vertex representing the ith argument at a call site; 0th argument is receiver

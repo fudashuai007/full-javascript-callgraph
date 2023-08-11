@@ -5,7 +5,6 @@ var graph = require('./graph'),
     callgraph = require('./callgraph');
 //给控制流图（Flow Graph）中添加一次性调用（one-shot call）的边
 function addOneShotEdges(ast, fg) {
-    console.log(ast.attr.functions);
     ast.attr.functions.forEach(function (fn) {
         var parent = fn.attr.parent,
             childProp = fn.attr.childProp;
@@ -48,12 +47,13 @@ function addOneShotEdges(ast, fg) {
 
     // set up flow for all other calls
     ast.attr.calls.forEach(function (call) {
-        console.log(call);
-
         if (!call.attr.oneshot)
             // 在流图 fg 中添加从每个参数顶点（flowgraph.argVertex(call, i)）到未知顶点（flowgraph.unknownVertex()）的边
             for (var i = 0; i <= call.arguments.length; ++i) {
-         
+                    if(call.arguments[i] &&( call.arguments[i].type === 'FunctionExpression'|| call.arguments[i].type === 'ArrowFunctionExpression')){
+                        // console.log(call);
+                        fg.addEdge(flowgraph.argVertex(call, i),flowgraph.vertexFor(call.callee))
+                    }
                     fg.addEdge(flowgraph.argVertex(call, i), flowgraph.unknownVertex());
                 // fg.addEdge(flowgraph.argVertex(call,i+1), flowgraph.vertexFor(call.callee));
             }
@@ -63,34 +63,12 @@ function addOneShotEdges(ast, fg) {
     });
 }
 
-function addCalleeWithIndex(ast, fg) {
-    ast.attr.calls.forEach(function (call) {
-        // 在流图 fg 中添加从每个参数顶点（flowgraph.argVertex(call, i)）到未知顶点（flowgraph.unknownVertex()）的边
-        for (var i = 0; i <= call.arguments.length; ++i) {
-            // let path = call.attr.path.split(' ')
-            // let index = path.indexOf(call.callee.name)
-            // let parentName = path[index]
-            // fg.addEdge( flowgraph.argVertex(call, i),{
-            //     type: 'GlobalVertex',
-            //     name: call.callee.name,
-            //     attr: {
-            //         pp: function () { return 'Glob(' + call.callee.name + ')'; }
-            //     }
-            // })
-            fg.addEdge(flowgraph.argVertex(call, i), flowgraph.unknownVertex());
-        }
 
-        // 在流图 fg 中添加从未知顶点（flowgraph.unknownVertex()）到调用结果顶点（flowgraph.resVertex(call)）的边
-        fg.addEdge(flowgraph.unknownVertex(), flowgraph.resVertex(call));
-    });
-}
 function buildCallGraph(ast) {
     var fg = new graph.FlowGraph();
     natives.addNativeFlowEdges(fg);
-    // if (!noOneShot)
     addOneShotEdges(ast, fg);
     flowgraph.addIntraproceduralFlowGraphEdges(ast, fg);
-    // addCalleeWithIndex(ast, fg)
     return callgraph.extractCG(ast, fg);
 }
 

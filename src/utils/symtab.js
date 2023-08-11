@@ -42,9 +42,16 @@ Symtab.prototype.hasOwn = function (name) {
 };
 
 Symtab.prototype.set = function (name, value) {
-    if (!name)
-        console.log('WARNING: name is falsy for Symtab, check bindings.js.');
-    return this[mangle(name)] = value;
+    try {
+        if (!name)
+            console.log('WARNING: name is falsy for Symtab, check bindings.js.');
+        return this[mangle(name)] = value;
+    } catch (error) {
+        console.log(error);
+    }
+    // console.log(name);
+
+
 };
 
 Symtab.prototype.values = function () {

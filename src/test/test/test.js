@@ -4,6 +4,10 @@
 //   // console.log(a);
 // }
 
+// const { objectExpression } = require("@babel/types")
+
+// const { assertAccessor } = require("@babel/types");
+
 
 // function a(){
 //   // console.log(1);
@@ -37,7 +41,16 @@
 // p.d.cc()
  
 // case4
-// (function(){})(function(){})
+// (function(a){
+//   // console.log(2);
+//   a()
+
+// })(
+  
+  
+//   function(){}
+  
+//   )
 // !function () {
 //   console.log(2123);
 // }();
@@ -70,10 +83,12 @@
 // }
 
 // b.toString()
-// 'aaa'.toString()
+// let arr = []
+// arr.toString()
 // function main (b,c) {
 // 	// console.log(args[]);
 //   // args[0]()
+//   // function b(){}
 //   b()
 //   // c()
 // }
@@ -122,23 +137,46 @@
 //   b:function a(){}
 // }
 // function toString(){}
-class P {
-  static toString(){
-    // console.log(123);
-  }
-  // toString(){
-  //   console.log(123);
-  // }
-}
+// let p = {
+//   a:function(){}
+// }
+//  function a(ss){
+//   //  console.log(1);
+//  }
+// function a(){
+//   // console.log(2);
+// }
 
-class SonP extends P {
-  // toString(){
-  //   console.log(456);
-  // }
-}
+// a()
+// a()
+// p.a()
+// p.a().b()
+// p.f.a().b()
+// p.a().f.b()
 
-let p = new SonP()
-p.toString()
+// class P {
+
+//   toString(){
+//     // console.log(123);
+//   }
+// }
+// class A extends P {
+//   toString(){
+//     // console.log(2);
+//   }
+//   static method(){
+//     super.toString()
+//   }
+// }
+// A.method()
+// class SonP extends P {
+//   toString(){
+//     // console.log(456);
+//   }
+// }
+
+// let p = new SonP()
+// p.toString()
 
 
 
@@ -202,24 +240,30 @@ p.toString()
 // obj.a()
 // case 9
 // let aa = function b(cc){
-//   cc(function(){})
+//   // console.log(1);
+//   function nns(){
+//     cc()
+//   }
+//   nns()
 //   // console.log(1);
 // }
+// // b()
+// aa(function (){})
 // function cc(as){
-  // let cc= {
-  //   bb:{
+//   let cc= {
+//     bb:{
     
-  //     cc:function(){ },
-  //     dd:function(){}
-  //   },
-  //   cc:function(dd){
-  //     console.log(11);
-  //   },
-  //   cc:function aa(gg){
-  //     console.log(22);
-  //   }
-  // }
-  // cc.cc()
+//       cc:function(){ },
+//       dd:function(){}
+//     },
+//     cc:function(dd){
+//       console.log(11);
+//     },
+//     cc:function aa(gg){
+//       console.log(22);
+//     }
+//   }
+//   cc.cc()
 // }
 // bb(function(){})
 // aa.bb(function(){}).cc(function(){})
@@ -229,14 +273,30 @@ p.toString()
 // console.log(aa);
 
 //case 10
-// function main () {
-// 	function cc(){}
-// 	const a = [ (e) => { e() } ];
-// 	let [b] = a;
-// 	b(cc);
+// let obj = {
+//   aa:function(){}
+// }
+// function main (cc) {
+//   obj.aa()
+
+// }
+// main(function(){});
+// function a(){}
+// a()
+// function a(){
+//   let b = ()=>{
+//     console.log(1);
+//   }
+//   b()
 // }
 
-// main();
+// function bb(){}
+// bb()
+// (function(cc){ cc()})(
+//   function(){
+//   // console.log(1);
+// })
+// 'aaa'.toString()
 
 // case 11
 // const fun1 = require('./fun1')
@@ -281,3 +341,67 @@ p.toString()
 // let a = new A()
 // a.where(function(){}).groupby().excute()
 
+// let obj1 = {
+//   aa:function(){}
+// }
+// let obj2 = {
+//   aa:function(){}
+// }
+
+// obj1.aa()
+
+// function aa(q){
+//   q()
+// }
+
+// function bb(){
+//   aa(function(){})
+// }
+// aa(function(){})
+// function cc(){
+//   aa(function(){})
+// }
+// function main(){
+//   bb()
+//   cc()
+// }
+
+// (function(){
+//   function a(){
+//     let b =arr.map(()=>{})
+//   }
+// })()
+// let arr = [].map(()=>{})
+// function disable() {
+//   const namespaces = [
+//     ...createDebug.names.map(toNamespace),
+//     ...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
+//   ].join(',');
+//   createDebug.enable('');
+//   return namespaces;
+// }
+// function a(b){
+//   b()
+// }
+
+// a(function(){})
+// let p = {
+//   a:function(){
+//     // console.log(1);
+//     return this
+//   },
+//   b:function(){
+//     // console.log(2);
+//     return this
+//   }
+// }
+
+// p.a().b()
+// function formatArgs(args) {
+
+	args[0].replace(/%[a-zA-Z%]/g,
+	() => {
+
+	});
+
+// }

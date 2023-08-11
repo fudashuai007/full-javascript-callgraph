@@ -93,6 +93,7 @@ function addBindings(ast) {
 
           return false;
 
+
         case 'CatchClause':
           scope = new symtab.Symtab(scope);
           scope.global = false;
@@ -152,12 +153,12 @@ function addBindings(ast) {
         //   doVisit(nd.right)
         //   state['withinDeclarator'] = false;
         //   return false
-          // if(!decl_scope.hasOwn(nd.left.name)){
-          //   decl_scope.set(nd.left.name, nd.left);
-          //   doVisit(nd.id)
-          // }else{
+        // if(!decl_scope.hasOwn(nd.left.name)){
+        //   decl_scope.set(nd.left.name, nd.left);
+        //   doVisit(nd.id)
+        // }else{
 
-          // }
+        // }
         case 'ObjectPattern':
           // ES6 Object Destructuring
           // { key: value }
@@ -206,7 +207,7 @@ function addBindings(ast) {
 
       }
     });
-    // console.log(global_scope);
+  // console.log(global_scope);
 }
 
 module.exports.addBindings = addBindings
