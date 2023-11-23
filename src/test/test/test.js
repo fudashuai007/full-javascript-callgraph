@@ -39,17 +39,17 @@
 //   }
 // }
 // p.d.cc()
- 
+
 // case4
 // (function(a){
 //   // console.log(2);
 //   a()
 
 // })(
-  
-  
+
+
 //   function(){}
-  
+
 //   )
 // !function () {
 //   console.log(2123);
@@ -66,7 +66,7 @@
 // })(function(){console.log(123);})
 
 // function a(){
-  
+
 // }
 
 // a()
@@ -83,6 +83,16 @@
 // }
 
 // b.toString()
+
+// const file1 = require('./file1')
+// const file2 = require('./dir')
+// const file3 = require('./file')
+// const file4 = require('./file2.js')
+function toString(){}
+
+arr.forEach(toString)
+
+// arr.map(toString)
 // let arr = []
 // arr.toString()
 // function main (b,c) {
@@ -252,7 +262,7 @@
 // function cc(as){
 //   let cc= {
 //     bb:{
-    
+
 //       cc:function(){ },
 //       dd:function(){}
 //     },
@@ -399,9 +409,20 @@
 // p.a().b()
 // function formatArgs(args) {
 
-	args[0].replace(/%[a-zA-Z%]/g,
-	() => {
+// args[0].replace(/%[a-zA-Z%]/g,
+// () => {
 
-	});
+// });
 
 // }
+
+// function a(aa){
+// 	aa()
+// }
+
+// function b(bb){
+// 	bb()
+// }
+
+// a(function(){})
+

@@ -15,7 +15,7 @@ function trimHashbangPrep(src) {
  * @param {*} fname filename
  * @param {*} src source code
  */
- function ts2js(fname, src) {
+function ts2js(fname, src) {
   return babel.transform(src, {
     presets: ["@babel/preset-typescript"],
     plugins: ["@babel/plugin-proposal-class-properties"],
@@ -25,6 +25,23 @@ function trimHashbangPrep(src) {
   }).code;
 }
 
+function nativeCalls() {
+  return ['every',
+    'filter',
+    'find',
+    'findIndex',
+    'findLast',
+    'findLastIndex',
+    'flatMap',
+    'forEach',
+    'map',
+    'reduce',
+    'reduceRight',
+    'some',
+    'sort',
+    'replace',]
+}
 
 module.exports.trimHashbangPrep = trimHashbangPrep
 module.exports.ts2js = ts2js
+module.exports.nativeCalls = nativeCalls

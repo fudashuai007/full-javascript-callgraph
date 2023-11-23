@@ -81,7 +81,12 @@ class BasicGraph {
 }
 
 function nodeToString(nd) {
-    return nd.attr.pp();
+    try{
+        return nd.attr.pp();
+    }catch(e){
+        console.log(nd);
+    } 
+   
 }
 
 var cf = nodeToString;

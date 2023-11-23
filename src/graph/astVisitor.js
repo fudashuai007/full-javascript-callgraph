@@ -2,9 +2,12 @@
 const parser = require('@babel/parser');
 const babel = require('@babel/core');
 const fs = require('fs');
+const path = require('path')
+const readlines = require('n-readlines');
 const traverse = require('@babel/traverse').default
 const { trimHashbangPrep } = require('../utils/tool')
 const { errorLog } = require('../utils/log');
+const { file } = require('@babel/types');
 /** gnerate AST from files */
 function astFromFiles(files) {
   const ast = {
@@ -43,13 +46,9 @@ function init(fname, root) {
   // global collections containing all functions and all call sites
   root.attr = {}
   root.attr.functions = new Map()
-  // root.attr.functions = [];
-  // root.attr.functions = new Map()
-  // root.attr.calls = [];
+  root.attr.children = []
   root.attr.calls = [];
-  // root.attr.nodePath = []
-
-  // root.attr.global.set(enclosingFile,new Map())
+  root.merged = false
   visitWithPath(root, function (nd, doVisit, parent, childProp) {
     if (nd.type && !nd.attr)
       nd['attr'] = {};
@@ -64,10 +63,35 @@ function init(fname, root) {
     if (nd.type === 'Program') {
       path = 'global'
       enclosingFile = fname;
-      // root.attr.nodePath.push({ type: 'global', path: path, node: nd, name: 'global', file: nd.attr.filename })
 
     } else {
+      // 收集文件依赖
+      /**
+       * import {a} from './a'
+       * import a from './a'
+       * import * as a from './a'
+       * 
+       */
 
+      if (nd.type === 'ImportDeclaration') {
+        if (nd.source.value.indexOf('./') != -1 || nd.source.value.indexOf('../') != -1) {
+          root.attr.children.push(nd.source.value)
+        }
+
+      }
+      else if (nd.type === 'CallExpression') {
+        if ((nd.callee.type === 'Identifier' && nd.callee.name === 'require') ||
+          nd.callee.type === 'MemberExpression' &&
+          nd.callee.object.type === 'Identifier' && nd.callee.object.name === 'require' &&
+          nd.property.type === 'Identifier' && nd.property.name === 'resolve'
+        ) {
+          if ((nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('./') != -1)
+            || (nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('../') != -1)) {
+            root.attr.children.push(nd.arguments[0].value)
+          }
+
+        }
+      }
       if (nd.type === 'Property' || nd.type === 'MethodDefinition') {
         path = parent.attr.path + (nd.key && nd.key.name ? ' ' + nd.key.name : ' ' + nd.key.value)
       } else {
@@ -75,12 +99,14 @@ function init(fname, root) {
         if (nd.type === 'FunctionExpression' && (childProp === 'value' || childProp === 'init')) {
           path = parent.attr.path
         } else {
-          // try {
-          path = parent.attr.path + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
-          // path = parent.attr.path?parent.attr.path:'' + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
-          // }
-          // catch (e) {
-          //   console.log(e);
+          try {
+            path = parent.attr.path + (nd.id && nd.id.name ? ' ' + nd.id.name : '')
+          } catch (error) {
+            console.log(error);
+            debugger
+          }
+
+
 
         }
 
@@ -94,23 +120,12 @@ function init(fname, root) {
         switch (nd.callee.type) {
           // 
           case 'Identifier':
+            // if(nd.parent.type==='')
             path = nd.callee.name
             break;
           case 'MemberExpression':
-            // console.log(nd.loc.start);
-            // console.log(parent);
-            // let pNode =parent
-            // while(pNode.type=='MemberExpression') {
-            //   pNode = pNode.attr.parent
-            // }
-            // while(parent.)
-            // if(parent.type!='MemberExpression'){
             path = handleRecusiveFindPath(nd.callee, nd.callee.property.name)
             break;
-          // }else{
-          //   path =handleRecusiveFindPath(nd.callee, nd.callee.property.name)
-          // }
-
           // 匿名函数调用
           case 'ParenthesizedExpression':
           case 'FunctionExpression':
@@ -122,6 +137,10 @@ function init(fname, root) {
         nd.attr.parent = parent
         // root.attr.calls.push(nd);
       }
+
+      // if(nd.type === 'Identifier'&&nd.attr.parent.type==='MemberExpression'){
+      //   path=nd.attr.parent.attr.path+' '+nd.name
+      // }
     }
 
     nd.attr['path'] = path
@@ -206,7 +225,9 @@ function init(fname, root) {
       } else {
         root.attr.functions.set(path.split(' ').pop(), nd);
       }
-
+      if (nd.keyName === 'arguments' && childProp && !isNaN(childProp)) {
+        nd.attr.funParamsIndex = childProp
+      }
       nd.attr.parent = parent;
       // nd.attr.originCode = print(nd)
       nd.attr.childProp = childProp;
@@ -228,7 +249,7 @@ function init(fname, root) {
             let paths = func.attr.path.split(' ')
             let pathIndex = paths.indexOf(nd.callee.name)
             if (pathIndex != -1 && !func.static) {
-              paths.splice(pathIndex + 1, 0, parent.id.name)
+              paths.splice(pathIndex + 1, 0, parent?.id?.name || '')
               func.attr.path = paths.join(' ')
             }
 
@@ -255,9 +276,9 @@ function handleRecusiveFindPath(node, path) {
     } else if (node.object.type === 'MemberExpression') {
       // console.log(node.object);
       if (node.object.object.type === 'CallExpression') {
-        return handleRecusiveFindPath(node.object, node.object.property.name) + ' ' + path
+        return handleRecusiveFindPath(node.object, node.object.property.name) + ' ' + path + node.object.property.name
       } else {
-        return node.object.object.name + ' ' + (node.object.property.name?node.object.property.name+' ':'') + path
+        return node.object.object.name + ' ' + (node.object.property.name ? node.object.property.name + ' ' : '') + path
       }
 
     }
@@ -279,6 +300,7 @@ function handleRecusiveFindPath(node, path) {
   //   }
 
   // }
+  return node.name || ''
 
 
 }
@@ -332,15 +354,118 @@ function nodePath2nodeMap(ast) {
 }
 
 function mergeAst(ast) {
+  // console.log([...ast.programs.entries()]);'
+  let forest = []
+  for (const [key, value] of ast.programs.entries()) {
+    if (value.merged) continue
+    else {
+      value.merged = true
+      let s_ast = {}
+      s_ast.functions = [].concat(...value.attr.functions.values())
+      s_ast.calls = [].concat(value.attr.calls)
+      s_ast.programs = []
+      s_ast.name = key
+      s_ast.programs.push(value)
+      let dir = path.dirname(key), filePath
+      value.attr.children.forEach(item => {
+        filePath = path.join(dir, item)
 
-  ast.attr.functions = [];
-  ast.attr.calls = [];
-  [...ast.programs.values()].forEach(item => {
-    ast.attr.functions = ast.attr.functions.concat([...item.attr.functions.values()])
-    ast.attr.calls = ast.attr.calls.concat(item.attr.calls)
+        // console.log(fs.existsSync(filePath));
 
-  });
-  ast.programs = [...ast.programs.values()];
+        if (fs.existsSync(filePath) &&fs.lstatSync(filePath).isDirectory()) {
+          try {
+            const files = fs.readdirSync(filePath);
+            if (files.includes('index.js')) {
+              filePath = path.join(filePath, 'index.js')
+            } else if (files.includes('index.ts')) {
+              filePath = path.join(filePath, 'index.ts')
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }
+        if (!(filePath.endsWith('.js') || filePath.endsWith('.ts'))) {
+          if (ast.programs.has(filePath + '.js')) {
+            filePath = filePath + '.js'
+          } else if (ast.programs.has(filePath + '.ts')) {
+            filePath = filePath + '.ts'
+          }
+        }
+        if (ast.programs.has(filePath)
+        ) {
+          let sub_ast = ast.programs.get(filePath)
+          if (sub_ast.merged) {
+            //  = s_ast.programs.concat(sub_ast)
+            // 对于先遍历的文件，但是没有是否被引入到其他文件的情况，先合并这个先遍历的文件，然后在森林中删除
+            let forestIndex = forest.findIndex(item => item.name === filePath)
+            if (forestIndex != -1) {
+              s_ast.programs = s_ast.programs.concat(forest[forestIndex].programs)
+              s_ast.calls = s_ast.calls.concat(forest[forestIndex].calls)
+              s_ast.functions = s_ast.functions.concat(forest[forestIndex].functions)
+              forest.splice(forestIndex, 1)
+            }
+
+          } else { // 文件没有被访问过
+            sub_ast.merged = true
+            s_ast.programs.push(sub_ast)
+            s_ast.calls = s_ast.calls.concat(sub_ast.attr.calls)
+            s_ast.functions = s_ast.functions.concat([...sub_ast.attr.functions.values()])
+            // forest.find(item=>item.name === filePath)
+            if (sub_ast.attr.children.length > 0) {
+              doVisit(s_ast, sub_ast.attr.children, filePath, ast)
+            }
+          }
+
+        }
+
+      })
+
+      // console.log(s_ast);
+      forest.push(s_ast)
+    }
+  }
+
+  function doVisit(root, children, f_path, allAst) {
+    children.forEach(item => {
+      let fname = path.join(path.dirname(f_path), item)
+      // console.log(fname);
+      if (fs.existsSync(fname) && fs.lstatSync(fname).isDirectory()) {
+        try {
+          const files = fs.readdirSync(fname);
+          if (files.includes('index.js')) {
+            fname = path.join(fname, 'index.js')
+          } else if (files.includes('index.ts')) {
+            filePath = path.join(fname, 'index.ts')
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      if (!(fname.endsWith('.js') || fname.endsWith('.ts'))) {
+        if (ast.programs.has(fname + '.js')) {
+          fname = fname + '.js'
+        } else if (ast.programs.has(fname + '.ts')) {
+          fname = fname + '.ts'
+        }
+      }
+
+      if (allAst.programs.has(fname)) {
+        let s_ast = allAst.programs.get(fname)
+        if (!s_ast.merged) {
+          s_ast.merged = true
+          root.programs.push(s_ast)
+          root.calls = root.calls.concat(s_ast.attr.calls)
+          root.functions = root.functions.concat([...s_ast.attr.functions.values()])
+          if (s_ast.attr.children.length > 0) {
+            doVisit(root, s_ast.attr.children, f_path, allAst)
+          }
+
+        }
+      }
+    })
+
+  }
+  return forest
   // console.log(ast);
 }
 
@@ -358,6 +483,8 @@ function visitWithPath(root, visitor) {
       childProp === 'specifiers' ||
       childProp === 'expressions' ||
       childProp === 'quasis' ||
+      childProp === 'cases' ||
+      childProp === 'consequent' ||
       childProp === 'params') {
       nd['attr'] = {}
       nd.attr['path'] = parent.attr.path
@@ -466,7 +593,7 @@ function funcname(func) {
   else if (func.id === null)
     return "anon";
   else if (!func.id.name) {
-    return func.id.id.name
+    return func.id?.id?.name || 'anon'
   }
   else
 
@@ -487,10 +614,56 @@ function encFuncName(encFunc) {
 
 /* Pretty-print position. */
 function ppPos(nd) {
+
   return basename(nd.attr.enclosingFile) + "@" + nd.loc.start.line + ":" + nd.range[0] + "-" + nd.range[1];
+  // return nd.attr.enclosingFile + ":" + nd.loc.start.line + ":" + Number(Number(nd.loc.start.column) + 1);
 }
-
-
+function ppPos(nd, bdir, v8,flag) {
+  let basePath
+  if(flag){
+    basePath = nd.call.func.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/");
+  }else
+      basePath = nd.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/");
+  if (basePath.startsWith("/")) {
+          basePath = basePath.substring(1);
+      }
+      let newCol 
+  if(flag){
+    newCol = v8 ? colNum2V8(Number(nd.loc.start.line), Number(nd.loc.start.column), nd.call.func.attr.enclosingFile, nd.call.func) : Number(Number(nd.loc.start.column) + 1);
+  }else{
+    newCol = v8 ? colNum2V8(Number(nd.loc.start.line), Number(nd.loc.start.column), nd.attr.enclosingFile, nd) : Number(Number(nd.loc.start.column) + 1);
+  }
+    
+      return basePath + ":" + nd.loc.start.line + ":" + newCol;
+  }
+  
+  function colNum2V8(ln, col, bdir, nd) {
+      if (basename(bdir) === "entry") {
+          return col+1;
+      }
+  
+     let liner = new readlines(bdir);
+     let lCount = 0;
+     let next;
+     let newCol = col;
+     while (next = liner.next()) {
+         lCount++;
+         if (lCount === ln) {
+             var line = next.toString("utf-8");
+             if (!line.substring(col).includes("=>")) {
+                 while(line.charAt(newCol) !== '(') {
+                     newCol++;
+                     if (newCol > line.length) {
+                          newCol = 0;
+                          break;
+                     }
+                 }
+             }
+         }
+     }
+     return newCol + 1;
+  
+}
 /* Parse a single source file and return its ast
 Args:
     fname - A string, the name of the source file
@@ -561,6 +734,7 @@ function preProcess(ast, fname) {
   let anonymousID = 0
   traverse(ast, {
     enter(path) {
+
       if (path.node.type === 'MethodDefinition' && path.node.key.type == 'PrivateName') {
         path.node.key['name'] = path.node.key.id.name
       }

@@ -61,13 +61,13 @@ function addBindings(ast) {
 
           state['withinParams'] = true;
           for (var i = 0; i < nd.params.length; ++i) {
-            // Handle identifer as before
+            // Handle identifier as before
             if (nd.params[i].type === 'Identifier')
               decl_scope.set(nd.params[i].name, nd.params[i]);
 
             // Always visit nd.params[i]
-            // Case 1: If nd.params[i] is an Identifer, visit it to set its scope attribute
-            // Case 2: If nd.params[i] is not an Identifer, visit it to set decl_scope
+            // Case 1: If nd.params[i] is an Identifier, visit it to set its scope attribute
+            // Case 2: If nd.params[i] is not an Identifier, visit it to set decl_scope
             doVisit(nd.params[i]);
           }
           state['withinParams'] = false;
@@ -131,14 +131,14 @@ function addBindings(ast) {
           return false
         case 'VariableDeclarator':
 
-          // If nd.id is an Identifer and its name hasn't been declared in the scope, set its name in the scope
+          // If nd.id is an Identifier and its name hasn't been declared in the scope, set its name in the scope
           // Re-declaration of a variable in the same scope is ignored
           if (nd.id.type === 'Identifier' && !decl_scope.hasOwn(nd.id.name))
             decl_scope.set(nd.id.name, nd.id);
 
           // visit both nd.id and nd.init
           // nd.id
-          //     Case 1: If nd.id is an Identifer, visit it and set its scope attribute
+          //     Case 1: If nd.id is an Identifier, visit it and set its scope attribute
           //     Case 2: If nd.id is a BindingPattern, visit it to extract declarations
           // nd.init might contain function expression
           state['withinDeclarator'] = true;
@@ -200,7 +200,7 @@ function addBindings(ast) {
 
         case 'Property':
           // Temporary fix for computed property names
-          // visit nd.key to avoid scope of identifer in computed property names being undefined
+          // visit nd.key to avoid scope of identifier in computed property names being undefined
           doVisit(nd.key);
           doVisit(nd.value);
           return false;
