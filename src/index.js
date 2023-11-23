@@ -36,15 +36,23 @@ program
   .parse();
 function addNode(edge, v) {
   if (v.type === 'NativeCalleeVertex') {
-    let nd = v.call;
-    edge.label = astVisitor.funcname(v.call.func)
-    // edge.label = 'nativeCall(' + nd.attr.path.split(' ')[nd.attr.path.split(' ').length - 1] + ')';
-    edge.file = nd.func.attr.enclosingFile;
-    edge.path = nd.attr.path;
-    edge.start = { row: nd.func.loc.start.line, column: nd.func.loc.start.column };
-    edge.end = { row: nd.func.loc.end.line, column: nd.func.loc.end.column };
-    edge.range = { start: nd.func.range[0], end: nd.func.range[1] };
+
+    let nd =v.call
+    edge.label ='NativeCallee('+v.name+')';
+    edge.file = nd.mes.split('<')[0];
+    edge.start = { row: v.loc.start.line, column: v.loc.start.column };
+    edge.end = { row: v.loc.end.line, column: v.loc.end.column };
+    edge.range = { start: nd.call.range[0], end: nd.call.range[1] };
     return edge;
+    // let nd = v.call;
+    // edge.label = astVisitor.funcname(v.call.func)
+    // // edge.label = 'nativeCall(' + nd.attr.path.split(' ')[nd.attr.path.split(' ').length - 1] + ')';
+    // edge.file = nd.func.attr.enclosingFile;
+    // edge.path = nd.attr.path;
+    // edge.start = { row: nd.func.loc.start.line, column: nd.func.loc.start.column };
+    // edge.end = { row: nd.func.loc.end.line, column: nd.func.loc.end.column };
+    // edge.range = { start: nd.func.range[0], end: nd.func.range[1] };
+    // return edge;
   }
   if (v.type === 'CalleeVertex') {
     let nd = v.call;
@@ -163,11 +171,15 @@ function main() {
   for (let i = 0; i < cgs.length; i++) {
     cgs[i].edges.iter(function (call, fn) {
       let edge = buildBinding(call, fn)
-      styleResult.push(pp(call,options.analysisDir,options.v8) + " -> " + pp(fn,options.analysisDir,options.v8))
+
+      // styleResult.push(pp(call,options.analysisDir,options.v8) + " -> " + pp(fn,options.analysisDir,options.v8))
       // if (options.od) {
       //   styleResult.push(pp(call, options.od, options.v8) + " -> " + pp(fn, options.od, options.v8))
       //   // console.log();
       // }
+      if(!(edge.source.file =='Native' || edge.target.file =='Native')){
+        styleResult.push(edge.source.file+'<'+edge.source.label+'>'+':'+edge.source.start.row+':'+edge.source.start.column+ " -> "+edge.target.file+':'+edge.target.start.row+':'+edge.target.start.column )
+      }
       result.push(edge);
     });
   }

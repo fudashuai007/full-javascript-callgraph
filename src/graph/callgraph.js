@@ -98,29 +98,19 @@ function extractCG(ast, flow_graph) {
                                 continue
                             } else {
                                 if (fnIndex == r[i].paramIndex) {
-                                    if (r[i].call.attr.enclosingFunction === undefined) {
-                                        if (r[i].call.type === 'CallExpression')
-                                            edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                        // edges.addEdge(fake_root, fn);
-                                    } else {
-                                        edges.addEdge(r[i].call.attr.enclosingFunction.attr.func_vertex, fn);
+                                        edges.addEdge(r[i], fn);
                                         r[i].visited = true
-                                    }
+
                                 } else {
                                     continue
                                 }
                             }
                         } else {
                             if (fnIndex != undefined) {
-                                if (r[i].call.attr.enclosingFunction === undefined) {
-                                    if (r[i].call.type === 'CallExpression')
-                                        edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                    // edges.addEdge(fake_root, fn);
-                                } else {
                                     if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1 && fnProp && fnProp === r[i].mes) {
-                                        edges.addEdge(nativeCalleeVertex(r[i].call.attr.enclosingFunction.attr.func_vertex), fn);
+                                        edges.addEdge(nativeCalleeVertex(r[i]), fn);
                                     }
-                                }
+
                                 continue
                             } else {
                                 // 优先去做路径匹配，路径匹配失效，再去直接匹配字符
@@ -136,31 +126,14 @@ function extractCG(ast, flow_graph) {
                                 // }
                                 // if(!fn.visited){
                                 if (nativeCalled) {
-                                    // 
-                                    // console.log(fnProp);
-                                    // console.log(r[i].mes);
-                                    // console.log(fnProp == r[i].mes);
-                                    // console.log(fnProp === r[i].mes);
                                     if (r[i].mes && fnProp === r[i].mes) {
-                                        if (r[i].call.attr.enclosingFunction === undefined) {
-                                            if (r[i].call.type === 'CallExpression')
-                                                edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                            // edges.addEdge(fake_root, fn);
-                                        } else {
-                                            edges.addEdge(nativeCalleeVertex(r[i].call.attr.enclosingFunction.attr.func_vertex), fn);
+                                            edges.addEdge(nativeCalleeVertex(r[i]), fn);
                                             continue
-                                        }
                                     }
 
                                 } else {
-                                    if (r[i].call.attr.enclosingFunction === undefined) {
-                                        if (r[i].call.type === 'CallExpression')
-                                            edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                        // edges.addEdge(fake_root, fn);
-                                    } else {
-                                        edges.addEdge(r[i].call.attr.enclosingFunction.attr.func_vertex, fn);
+                                        edges.addEdge(r[i], fn);
                                         r[i].visited = true
-                                    }
                                 }
 
                                 // }
@@ -178,16 +151,7 @@ function extractCG(ast, flow_graph) {
                 if (r[i].type === 'UnknownVertex')
                     escaping[escaping.length] = fn;
                 else if (r[i].type === 'CalleeVertex' && !r[i].visited) {
-                    // let callPath = r[i].call.attr.path.split(' ')
-                    // if (r[i].paramIndex != undefined) {
-                        // if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1) {
-                        //     edges.addEdge(nativeCalleeVertex(r[i].call.attr.enclosingFunction.attr.func_vertex), fn);
-                        //     r[i].visited = true
-                        // }
-                    //     continue
-                    // } else {
                         edges.addEdge(r[i], fn);
-                    // }
                 }
             }
         }
@@ -204,10 +168,11 @@ function extractCG(ast, flow_graph) {
             call: nd,
             attr: {
                 pp: function () {
-                    return `Callee(nativeCall)<${nd.func.loc.start.line+','+nd.func.loc.start.column}>`;
+                    return `Callee(nativeCall)<${nd.call.loc.start.line+','+nd.call.loc.start.column}>`;
                 }
             },
-            loc:nd.func.loc,
+            loc:nd.call.loc,
+            name:tool.getNativeName(nd.call.attr.path),
             visited: false
         };
 

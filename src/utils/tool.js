@@ -42,6 +42,31 @@ function nativeCalls() {
     'replace',]
 }
 
+function getNativeName(path) {
+  let native_calls = ['every',
+    'filter',
+    'find',
+    'findIndex',
+    'findLast',
+    'findLastIndex',
+    'flatMap',
+    'forEach',
+    'map',
+    'reduce',
+    'reduceRight',
+    'some',
+    'sort',
+    'replace']
+  let paths = path.split(' ')
+  let set = new Set(native_calls)
+  for (let e of paths) {
+    if (set.has(e)) {
+      return e;
+    }
+  }
+}
+
 module.exports.trimHashbangPrep = trimHashbangPrep
 module.exports.ts2js = ts2js
 module.exports.nativeCalls = nativeCalls
+module.exports.getNativeName = getNativeName

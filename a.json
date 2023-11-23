@@ -1,160 +1,21 @@
 [
   {
     "source": {
-      "label": "<entry>",
+      "label": "global",
       "file": "src\\test\\Data\\debug\\src\\browser.js",
       "start": {
-        "row": 1,
-        "column": 0
+        "row": 12,
+        "column": 18
       },
       "end": {
-        "row": 1,
-        "column": 0
+        "row": 21,
+        "column": 4
       },
       "range": {
-        "start": 1,
-        "end": 1
-      }
-    },
-    "target": {
-      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>",
-      "file": "src\\test\\Data\\debug\\src\\node.js",
-      "start": {
-        "row": 126,
-        "column": 10
+        "start": 249,
+        "end": 497
       },
-      "end": {
-        "row": 149,
-        "column": 1
-      },
-      "range": {
-        "start": 1953,
-        "end": 2434
-      },
-      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>"
-    }
-  },
-  {
-    "source": {
-      "label": "<entry>",
-      "file": "src\\test\\Data\\debug\\src\\browser.js",
-      "start": {
-        "row": 1,
-        "column": 0
-      },
-      "end": {
-        "row": 1,
-        "column": 0
-      },
-      "range": {
-        "start": 1,
-        "end": 1
-      }
-    },
-    "target": {
-      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>",
-      "file": "src\\test\\Data\\debug\\src\\node.js",
-      "start": {
-        "row": 124,
-        "column": 54
-      },
-      "end": {
-        "row": 126,
-        "column": 1
-      },
-      "range": {
-        "start": 1902,
-        "end": 1944
-      },
-      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>"
-    }
-  },
-  {
-    "source": {
-      "label": "<entry>",
-      "file": "src\\test\\Data\\debug\\src\\browser.js",
-      "start": {
-        "row": 1,
-        "column": 0
-      },
-      "end": {
-        "row": 1,
-        "column": 0
-      },
-      "range": {
-        "start": 1,
-        "end": 1
-      }
-    },
-    "target": {
-      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous0-argumentKey0-<19,1>",
-      "file": "src\\test\\Data\\debug\\src\\node.js",
-      "start": {
-        "row": 19,
-        "column": 1
-      },
-      "end": {
-        "row": 19,
-        "column": 9
-      },
-      "range": {
-        "start": 352,
-        "end": 360
-      },
-      "path": "util deprecate src\\test\\Data\\debug\\src\\node.js-anonymous0-argumentKey0-<19,1>"
-    }
-  },
-  {
-    "source": {
-      "label": "<entry>",
-      "file": "src\\test\\Data\\debug\\src\\browser.js",
-      "start": {
-        "row": 1,
-        "column": 0
-      },
-      "end": {
-        "row": 1,
-        "column": 0
-      },
-      "range": {
-        "start": 1,
-        "end": 1
-      }
-    },
-    "target": {
-      "label": "localstorage",
-      "file": "src\\test\\Data\\debug\\src\\browser.js",
-      "start": {
-        "row": 247,
-        "column": 0
-      },
-      "end": {
-        "row": 256,
-        "column": 1
-      },
-      "range": {
-        "start": 5387,
-        "end": 5692
-      },
-      "path": "global localstorage"
-    }
-  },
-  {
-    "source": {
-      "label": "<entry>",
-      "file": "src\\test\\Data\\debug\\src\\browser.js",
-      "start": {
-        "row": 1,
-        "column": 0
-      },
-      "end": {
-        "row": 1,
-        "column": 0
-      },
-      "range": {
-        "start": 1,
-        "end": 1
-      }
+      "path": "global"
     },
     "target": {
       "label": "src\\test\\Data\\debug\\src\\browser.js-anonymous0-<12,19>",
@@ -179,54 +40,18 @@
       "label": "createDebug",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 60,
-        "column": 1
+        "row": 117,
+        "column": 20
       },
       "end": {
-        "row": 147,
-        "column": 2
+        "row": 117,
+        "column": 43
       },
       "range": {
-        "start": 1519,
-        "end": 3772
+        "start": 2965,
+        "end": 2988
       },
-      "path": "global setup createDebug"
-    },
-    "target": {
-      "label": "init",
-      "file": "src\\test\\Data\\debug\\src\\node.js",
-      "start": {
-        "row": 231,
-        "column": 0
-      },
-      "end": {
-        "row": 238,
-        "column": 1
-      },
-      "range": {
-        "start": 4194,
-        "end": 4404
-      },
-      "path": "global init"
-    }
-  },
-  {
-    "source": {
-      "label": "createDebug",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
-      "start": {
-        "row": 60,
-        "column": 1
-      },
-      "end": {
-        "row": 147,
-        "column": 2
-      },
-      "range": {
-        "start": 1519,
-        "end": 3772
-      },
-      "path": "global setup createDebug"
+      "path": "createDebug useColors"
     },
     "target": {
       "label": "useColors",
@@ -251,54 +76,18 @@
       "label": "createDebug",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 60,
-        "column": 1
+        "row": 117,
+        "column": 20
       },
       "end": {
-        "row": 147,
-        "column": 2
+        "row": 117,
+        "column": 43
       },
       "range": {
-        "start": 1519,
-        "end": 3772
+        "start": 2965,
+        "end": 2988
       },
-      "path": "global setup createDebug"
-    },
-    "target": {
-      "label": "selectColor",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
-      "start": {
-        "row": 41,
-        "column": 1
-      },
-      "end": {
-        "row": 50,
-        "column": 2
-      },
-      "range": {
-        "start": 1052,
-        "end": 1339
-      },
-      "path": "global setup selectColor"
-    }
-  },
-  {
-    "source": {
-      "label": "createDebug",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
-      "start": {
-        "row": 60,
-        "column": 1
-      },
-      "end": {
-        "row": 147,
-        "column": 2
-      },
-      "range": {
-        "start": 1519,
-        "end": 3772
-      },
-      "path": "global setup createDebug"
+      "path": "createDebug useColors"
     },
     "target": {
       "label": "useColors",
@@ -320,19 +109,19 @@
   },
   {
     "source": {
-      "label": "formatArgs",
+      "label": "NativeCallee(replace)",
       "file": "src\\test\\Data\\debug\\src\\browser.js",
       "start": {
-        "row": 146,
-        "column": 0
-      },
-      "end": {
-        "row": 182,
+        "row": 166,
         "column": 1
       },
+      "end": {
+        "row": 179,
+        "column": 3
+      },
       "range": {
-        "start": 3312,
-        "end": 4132
+        "start": 3866,
+        "end": 4101
       }
     },
     "target": {
@@ -358,18 +147,18 @@
       "label": "enable",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 162,
-        "column": 1
-      },
-      "end": {
-        "row": 187,
+        "row": 163,
         "column": 2
       },
-      "range": {
-        "start": 4154,
-        "end": 4795
+      "end": {
+        "row": 163,
+        "column": 30
       },
-      "path": "global setup enable"
+      "range": {
+        "start": 4187,
+        "end": 4215
+      },
+      "path": "createDebug save"
     },
     "target": {
       "label": "save",
@@ -394,18 +183,18 @@
       "label": "enable",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 162,
-        "column": 1
-      },
-      "end": {
-        "row": 187,
+        "row": 163,
         "column": 2
       },
-      "range": {
-        "start": 4154,
-        "end": 4795
+      "end": {
+        "row": 163,
+        "column": 30
       },
-      "path": "global setup enable"
+      "range": {
+        "start": 4187,
+        "end": 4215
+      },
+      "path": "createDebug save"
     },
     "target": {
       "label": "save",
@@ -430,18 +219,18 @@
       "label": "setup",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 7,
-        "column": 0
+        "row": 269,
+        "column": 20
       },
       "end": {
-        "row": 272,
-        "column": 1
+        "row": 269,
+        "column": 38
       },
       "range": {
-        "start": 114,
-        "end": 6534
+        "start": 6487,
+        "end": 6505
       },
-      "path": "global setup"
+      "path": "createDebug load"
     },
     "target": {
       "label": "load",
@@ -466,54 +255,18 @@
       "label": "setup",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 7,
-        "column": 0
+        "row": 269,
+        "column": 20
       },
       "end": {
-        "row": 272,
-        "column": 1
+        "row": 269,
+        "column": 38
       },
       "range": {
-        "start": 114,
-        "end": 6534
+        "start": 6487,
+        "end": 6505
       },
-      "path": "global setup"
-    },
-    "target": {
-      "label": "enable",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
-      "start": {
-        "row": 162,
-        "column": 1
-      },
-      "end": {
-        "row": 187,
-        "column": 2
-      },
-      "range": {
-        "start": 4154,
-        "end": 4795
-      },
-      "path": "global setup enable"
-    }
-  },
-  {
-    "source": {
-      "label": "setup",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
-      "start": {
-        "row": 7,
-        "column": 0
-      },
-      "end": {
-        "row": 272,
-        "column": 1
-      },
-      "range": {
-        "start": 114,
-        "end": 6534
-      },
-      "path": "global setup"
+      "path": "createDebug load"
     },
     "target": {
       "label": "load",
@@ -535,19 +288,55 @@
   },
   {
     "source": {
-      "label": "setup",
-      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "label": "global",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
       "start": {
-        "row": 7,
+        "row": 11,
+        "column": 18
+      },
+      "end": {
+        "row": 11,
+        "column": 32
+      },
+      "range": {
+        "start": 215,
+        "end": 229
+      },
+      "path": "localstorage"
+    },
+    "target": {
+      "label": "localstorage",
+      "file": "src\\test\\Data\\debug\\src\\browser.js",
+      "start": {
+        "row": 247,
         "column": 0
       },
       "end": {
-        "row": 272,
+        "row": 256,
         "column": 1
       },
       "range": {
-        "start": 114,
-        "end": 6534
+        "start": 5387,
+        "end": 5692
+      },
+      "path": "global localstorage"
+    }
+  },
+  {
+    "source": {
+      "label": "NativeCallee(forEach)",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 17,
+        "column": 1
+      },
+      "end": {
+        "row": 19,
+        "column": 3
+      },
+      "range": {
+        "start": 413,
+        "end": 483
       }
     },
     "target": {
@@ -570,21 +359,57 @@
   },
   {
     "source": {
-      "label": "extend",
+      "label": "createDebug",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 149,
+        "row": 118,
+        "column": 16
+      },
+      "end": {
+        "row": 118,
+        "column": 50
+      },
+      "range": {
+        "start": 3007,
+        "end": 3041
+      },
+      "path": "createDebug selectColor"
+    },
+    "target": {
+      "label": "selectColor",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 41,
         "column": 1
       },
       "end": {
-        "row": 153,
+        "row": 50,
         "column": 2
       },
       "range": {
-        "start": 3777,
-        "end": 3984
+        "start": 1052,
+        "end": 1339
       },
-      "path": "global setup extend"
+      "path": "global setup selectColor"
+    }
+  },
+  {
+    "source": {
+      "label": "extend",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 150,
+        "column": 19
+      },
+      "end": {
+        "row": 150,
+        "column": 113
+      },
+      "range": {
+        "start": 3837,
+        "end": 3931
+      },
+      "path": "createDebug"
     },
     "target": {
       "label": "createDebug",
@@ -606,19 +431,19 @@
   },
   {
     "source": {
-      "label": "debug",
+      "label": "NativeCallee(replace)",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 66,
-        "column": 2
+        "row": 91,
+        "column": 13
       },
       "end": {
-        "row": 114,
-        "column": 3
+        "row": 107,
+        "column": 5
       },
       "range": {
-        "start": 1650,
-        "end": 2909
+        "start": 2204,
+        "end": 2726
       }
     },
     "target": {
@@ -641,21 +466,21 @@
   },
   {
     "source": {
-      "label": "disable",
+      "label": "setup",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 195,
+        "row": 269,
         "column": 1
       },
       "end": {
-        "row": 202,
-        "column": 2
+        "row": 269,
+        "column": 39
       },
       "range": {
-        "start": 4889,
-        "end": 5121
+        "start": 6468,
+        "end": 6506
       },
-      "path": "global setup disable"
+      "path": "createDebug enable"
     },
     "target": {
       "label": "enable",
@@ -680,16 +505,52 @@
       "label": "disable",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 195,
+        "row": 200,
+        "column": 2
+      },
+      "end": {
+        "row": 200,
+        "column": 24
+      },
+      "range": {
+        "start": 5072,
+        "end": 5094
+      },
+      "path": "createDebug enable"
+    },
+    "target": {
+      "label": "enable",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 162,
         "column": 1
       },
       "end": {
-        "row": 202,
+        "row": 187,
         "column": 2
       },
       "range": {
-        "start": 4889,
-        "end": 5121
+        "start": 4154,
+        "end": 4795
+      },
+      "path": "global setup enable"
+    }
+  },
+  {
+    "source": {
+      "label": "NativeCallee(map)",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 198,
+        "column": 6
+      },
+      "end": {
+        "row": 198,
+        "column": 74
+      },
+      "range": {
+        "start": 4984,
+        "end": 5052
       }
     },
     "target": {
@@ -712,19 +573,19 @@
   },
   {
     "source": {
-      "label": "disable",
+      "label": "NativeCallee(map)",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 195,
-        "column": 1
+        "row": 198,
+        "column": 6
       },
       "end": {
-        "row": 202,
-        "column": 2
+        "row": 198,
+        "column": 74
       },
       "range": {
-        "start": 4889,
-        "end": 5121
+        "start": 4984,
+        "end": 5052
       }
     },
     "target": {
@@ -750,18 +611,18 @@
       "label": "anon",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 125,
-        "column": 8
+        "row": 131,
+        "column": 20
       },
       "end": {
-        "row": 135,
-        "column": 4
+        "row": 131,
+        "column": 50
       },
       "range": {
-        "start": 3273,
-        "end": 3549
+        "start": 3477,
+        "end": 3507
       },
-      "path": "Object defineProperty get"
+      "path": "createDebug enabled"
     },
     "target": {
       "label": "enabled",
@@ -786,18 +647,18 @@
       "label": "debug",
       "file": "src\\test\\Data\\debug\\src\\common.js",
       "start": {
-        "row": 66,
-        "column": 2
+        "row": 82,
+        "column": 13
       },
       "end": {
-        "row": 114,
-        "column": 3
+        "row": 82,
+        "column": 40
       },
       "range": {
-        "start": 1650,
-        "end": 2909
+        "start": 1978,
+        "end": 2005
       },
-      "path": "global setup createDebug debug"
+      "path": "createDebug coerce"
     },
     "target": {
       "label": "coerce",
@@ -819,21 +680,91 @@
   },
   {
     "source": {
-      "label": "formatArgs",
+      "label": "NativeCallee(filter)",
       "file": "src\\test\\Data\\debug\\src\\node.js",
       "start": {
-        "row": 167,
-        "column": 0
+        "row": 124,
+        "column": 22
       },
       "end": {
-        "row": 180,
+        "row": 149,
+        "column": 6
+      },
+      "range": {
+        "start": 1870,
+        "end": 2439
+      }
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 126,
+        "column": 10
+      },
+      "end": {
+        "row": 149,
         "column": 1
       },
       "range": {
-        "start": 2740,
-        "end": 3187
+        "start": 1953,
+        "end": 2434
       },
-      "path": "global formatArgs"
+      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous2-argumentKey0-<126,10>"
+    }
+  },
+  {
+    "source": {
+      "label": "NativeCallee(filter)",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 124,
+        "column": 22
+      },
+      "end": {
+        "row": 149,
+        "column": 6
+      },
+      "range": {
+        "start": 1870,
+        "end": 2439
+      }
+    },
+    "target": {
+      "label": "src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 124,
+        "column": 54
+      },
+      "end": {
+        "row": 126,
+        "column": 1
+      },
+      "range": {
+        "start": 1902,
+        "end": 1944
+      },
+      "path": "Object filter src\\test\\Data\\debug\\src\\node.js-anonymous1-argumentKey0-<124,54>"
+    }
+  },
+  {
+    "source": {
+      "label": "formatArgs",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 178,
+        "column": 12
+      },
+      "end": {
+        "row": 178,
+        "column": 21
+      },
+      "range": {
+        "start": 3147,
+        "end": 3156
+      },
+      "path": "getDate"
     },
     "target": {
       "label": "getDate",
@@ -851,6 +782,42 @@
         "end": 3311
       },
       "path": "global getDate"
+    }
+  },
+  {
+    "source": {
+      "label": "createDebug",
+      "file": "src\\test\\Data\\debug\\src\\common.js",
+      "start": {
+        "row": 143,
+        "column": 3
+      },
+      "end": {
+        "row": 143,
+        "column": 26
+      },
+      "range": {
+        "start": 3720,
+        "end": 3743
+      },
+      "path": "createDebug init"
+    },
+    "target": {
+      "label": "init",
+      "file": "src\\test\\Data\\debug\\src\\node.js",
+      "start": {
+        "row": 231,
+        "column": 0
+      },
+      "end": {
+        "row": 238,
+        "column": 1
+      },
+      "range": {
+        "start": 4194,
+        "end": 4404
+      },
+      "path": "global init"
     }
   },
   {
