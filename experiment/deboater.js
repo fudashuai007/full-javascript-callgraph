@@ -1,0 +1,215 @@
+const fs = require("fs");
+const path = require("path");
+const { stubFunction } = require("./stubFunction.js");
+const { flagFunctionForStubbing } = require("./functionFlagging.js");
+const stubFile = require("./stubFile.js");
+const { getTargetsFromCoverageReport, getTargetsFromACG, buildHappyName, getFileName } = require("./stubUtils.js");
+const { argv } = require("process");
+// const yargs = require("yargs");
+const { execSync } = require("child_process");
+
+// 获取指定目录下的所有文件路径，并递归获取子目录中的文件路径
+function getAllFiles(dirname, recurse = true, listOfFiles = []) {
+  let baseListOfFiles = fs.readdirSync(dirname);
+  baseListOfFiles.forEach(function (file) {
+    if (fs.statSync(dirname + "/" + file).isDirectory() && recurse) {
+      listOfFiles = getAllFiles(dirname + "/" + file, recurse, listOfFiles);
+    }
+    else {
+      listOfFiles.push(path.join(__dirname, dirname, "/", file));
+    }
+  });
+  return listOfFiles;
+};
+// 确定是否应该对指定的文件进行stubbify操作
+function shouldStubbify(curPath, file, depList) {
+  let shouldStub = fs.lstatSync(curPath).isFile() &&  // 检查文件是否为普通文件而不是目录
+    file.substr(file.length - 2) == "js" && // 检查文件是否以 ".js" 结尾
+    file.indexOf("externs") == -1 && //  确保文件名中不包含 "externs"
+    file.indexOf("node_modules/@babel") == -1 && // 确保文件路径中不包含 "@babel" 目录
+    (file.indexOf("test") == -1 ||
+      file.indexOf("node_modules") > -1);
+  // 如果传入了依赖列表 depList，则检查文件是否在依赖列表中。如果文件位于 "node_modules" 目录下，确保其在依赖列表中
+  if (depList) {
+    let node_mod_index = curPath.split("/").indexOf("node_modules");
+    if (node_mod_index > -1) { // if it's a node_module and we have a dep list, need to make sure it's in the dep list 
+      shouldStub = shouldStub && (depList.indexOf(curPath.split("/")[node_mod_index + 1]) > -1);
+    }
+  }
+  return shouldStub;
+}
+
+let bundlerMode = "bundle_and_stub"; // default: don't bundle
+let bundleOptions = {
+  no: "no",
+  only_bundle: "only_bundle",
+  stub_bundle: "stub_bundle",
+  bundle_and_stub: "bundle_and_stub"
+  // no, only_bundle, stub_bundle, bundle_and_stub
+}
+// valid options are:
+// "no" : dont bundle
+// "only_bundle" : bundle but don't stub anything
+// "stub_bundle" : stub an existing bundle file (this requires the bundle to have been previously created)
+// "bundle_and_stub" : both stub and bundle
+// if (argv.bundler_mode) {
+//   if (!bundleOptions[argv.bundler_mode]) {
+//     console.log("Invalid bundle option provided: " + bundlerMode + "; proceeding without bundling");
+//     bundlerMode = "no";
+//   }
+// }
+
+let testingMode = true;
+let recurseThroughDirs = true;
+
+let filename = '../experiment/result/body-parser';
+console.log('Reading ' + filename);
+
+let callgraphpath = false;
+let coverageReportPath = '../experiment/result/body-parser/coverage/coverage-final.json';
+let removeFunsPath = null;
+let functions = [];
+let listedFiles = [];
+let removeFuns = [];
+let noCG = true;
+let uncoveredMode = true;
+let depList;
+// 静态分析
+if (callgraphpath) {
+  let targets = getTargetsFromACG(callgraphpath);
+  functions = targets.map(buildHappyName);
+  listedFiles = targets.map(getFileName);
+  noCG = false;
+}
+
+let zipFiles = false; // Currently don't ever do this.
+if (removeFunsPath) {
+  removeFuns = getTargetsFromACG(removeFunsPath).map(buildHappyName);
+}
+// 动态分析
+if (uncoveredMode) {
+  let targets = getTargetsFromCoverageReport(coverageReportPath);
+  functions = targets.map(buildHappyName);
+  let all_listedFiles = targets.map(getFileName);
+  all_listedFiles.forEach(element => {
+    if (listedFiles.indexOf(element) == -1)
+      listedFiles.push(element);
+  });
+  noCG = false;
+  console.log(listedFiles);
+  console.log(functions);
+}
+
+if (argv.dependencies) {
+  depList = fs.readFileSync(argv.dependencies, 'utf-8').split("\n");
+}
+
+if (bundlerMode != "no") {
+  if (bundlerMode == "bundle_and_stub" || bundlerMode == "only_bundle") {
+    let files = getAllFiles(filename, recurseThroughDirs);
+    files.forEach(function (file, index) {
+      let curPath = filename + file;
+      curPath = file;
+      if (shouldStubbify(curPath, file, depList)) { // don't even try to stub externs
+        if (noCG || listedFiles.indexOf(curPath) > -1) { // file is reachable, so only stubify functions
+          console.log("FUNCTION CASE: flagging to be stubbed: " + curPath);
+          try {
+            flagFunctionForStubbing(curPath, process.cwd(), functions, uncoveredMode);
+          }
+          catch (e) {
+            console.log("ERROR: cannot stubbify function in: " + curPath);
+          }
+        }
+        else {
+          console.log("FILE CASE: flagging all functions to be stubbed in: " + curPath);
+          try {
+            flagFunctionForStubbing(curPath, process.cwd(), [], uncoveredMode);
+          }
+          catch (e) {
+            console.log("ERROR: cannot stubbify all functions in file: " + curPath);
+            // console.log(e);
+          }
+        }
+      }
+    });
+    // By now, the functions that should be stubbed are flagged as such with 
+    // eva("STUB_FLAG_STUB_THIS_STUB_FCT") as the first thing in the function body.
+    // Now, we need to call the bundler.
+    // To do this, we should just dispatch a shell command which invokes the bundler.
+    // Notes:
+    // 1. Bundler needs to be installed globally.
+    // 2. Bundler needs to be called from the project being stubbified.
+    // 3. Bundler config file is needed. 
+    // create bundler config file
+    generateBundlerConfig(path.resolve(filename));
+    // cd into project directory (filename is the path to the tgt project)
+    // save current directory first to chdir back
+    let stubsDir = process.cwd();
+    process.chdir(path.resolve(filename));
+    // call bundler
+    execSync('rollup --config rollup.stubbifier.config.js');
+    // cd back into stubbifier
+    process.chdir(stubsDir);
+  }
+  // Once bundled, we need to read in the bundle and stubbify the functions with
+  // the eval.
+  if (bundlerMode == "bundle_and_stub" || bundlerMode == "stub_bundle")
+    stubFunction(
+      path.resolve(filename) + '/stubbifyBundle.js',
+      process.cwd(),
+      new Map(),
+      functions,
+      removeFuns,
+      uncoveredMode,
+      safeEvalMode,
+      testingMode,
+      zipFiles,
+      true);
+}
+else {
+  // stubbing section; no bundling 
+  if (fs.lstatSync(filename).isDirectory()) {
+    let files = getAllFiles(filename, recurseThroughDirs);
+    files.forEach(function (file, index) {
+      // console.log(file);
+      // only stubify JS files
+      let curPath = filename + file;
+      curPath = file;
+      // console.log("decision: " + shouldStubbify(curPath, file, depList));
+      // let curAbsPath: string = process.cwd() + curPath;
+      if (shouldStubbify(curPath, file, depList)) { // don't even try to stub externs
+        if (noCG || listedFiles.indexOf(curPath) > -1) { // file is reachable, so only stubify functions
+          console.log("FUNCTION CASE: " + curPath);
+          try {
+            stubFunction(
+              curPath,
+              process.cwd(),
+              new Map(),
+              functions,
+              removeFuns,
+              uncoveredMode,
+              safeEvalMode,
+              testingMode);
+          }
+          catch (e) {
+            console.log("ERROR: cannot stubbify function in: " + curPath);
+            // console.log(e);
+          }
+        }
+        else {
+          console.log("FILE CASE: " + curPath);
+          try {
+            stubFile(curPath, safeEvalMode, testingMode);
+          }
+          catch (e) {
+            console.log("ERROR: cannot stubbify file: " + curPath);
+            // console.log(e);
+          }
+        }
+      }
+    });
+  }
+  else {
+    console.log("Error: input to transformer must be a directory");
+  }
+}
