@@ -1,13 +1,14 @@
 const fs = require('fs');
 const { parse } = require('@babel/parser');
-const { generate } = require('@babel/generator').default;
+const  generate  = require('@babel/generator').default;
 const { transformFromAstSync } = require('@babel/core');
-const { generateNodeUID,getNumLinesSpannedByNode } = require('./stubUtils.js');
+const { generateNodeUID, getNumLinesSpannedByNode } = require('./stubUtils.js');
+// const { log } = require('console');
 
 const MIN_FCT_STUB_LENGTH = 5; // only stub functions that are > 5 lines long
 
 function shouldTransformFunction(fctName, reachableFuns) {
-  let fctNotInList = (reachableFuns.indexOf(fctName) == -1);
+  let fctNotInList = reachableFuns.includes(fctName);
   return fctNotInList;
 }
 
@@ -55,14 +56,16 @@ function processASTForFlagging(ast, reachableFuns, filename, uncoveredMode) {
         visitor: {
           Function(path) {
             // let inFunction: boolean = path.findParent((path) => path.isFunction());
-            if (supportedFunctionNodes.indexOf(path.node.type) > -1  
-            && getNumLinesSpannedByNode(path.node) > MIN_FCT_STUB_LENGTH) {
+            if (supportedFunctionNodes.indexOf(path.node.type) > -1
+              && getNumLinesSpannedByNode(path.node) > MIN_FCT_STUB_LENGTH) {
               // let functionUIDName = "global::" + path.node.id.name;
               let functionUIDName = generateNodeUID(path.node, filename, uncoveredMode);
               // don't forget to write out function body before we replace
               if (shouldTransformFunction(functionUIDName, reachableFuns)) {
                 // console.log("Triggered stubbification.");
-                if (path.node.kind == "constructor" || path.node.generator || path.node.async) { // TODO broken for generators 
+                if (path.node.kind == "constructor" ||
+                  path.node.generator ||
+                  path.node.async) { // TODO broken for generators 
                   path.skip(); // don't transform a constructor or anything in a constructor (stubs dont work with "super" and "this")
                 } else {
                   let flaggedParent = path.findParent((path) => path.node.isFlagged);

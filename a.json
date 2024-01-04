@@ -1,0 +1,74 @@
+[
+  {
+    "source": {
+      "label": "global",
+      "file": "mcg\\src\\test\\exper\\test1.js",
+      "start": {
+        "row": 18,
+        "column": 0
+      },
+      "end": {
+        "row": 18,
+        "column": 6
+      },
+      "range": {
+        "start": 233,
+        "end": 239
+      },
+      "path": "a1 b"
+    },
+    "target": {
+      "label": "b",
+      "file": "mcg\\src\\test\\exper\\test1.js",
+      "start": {
+        "row": 11,
+        "column": 4
+      },
+      "end": {
+        "row": 11,
+        "column": 16
+      },
+      "range": {
+        "start": 180,
+        "end": 192
+      },
+      "path": "global a1 b"
+    }
+  },
+  {
+    "source": {
+      "label": "global",
+      "file": "mcg\\src\\test\\exper\\test1.js",
+      "start": {
+        "row": 18,
+        "column": 0
+      },
+      "end": {
+        "row": 18,
+        "column": 6
+      },
+      "range": {
+        "start": 233,
+        "end": 239
+      },
+      "path": "a1 b"
+    },
+    "target": {
+      "label": "b",
+      "file": "mcg\\src\\test\\exper\\test1.js",
+      "start": {
+        "row": 15,
+        "column": 4
+      },
+      "end": {
+        "row": 15,
+        "column": 16
+      },
+      "range": {
+        "start": 214,
+        "end": 226
+      },
+      "path": "global a2 b"
+    }
+  }
+]

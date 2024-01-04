@@ -1,7 +1,9 @@
 
 const babel = require("@babel/types");
 const path = require('path')
-
+const fs = require('fs')
+const parser=require('@babel/parser');
+const generate  = require('@babel/generator').default;
 // 文件路径或位置信息的格式化
 function buildHappyName(sad) {
   /* 输入: acorn/src/location.js:<12,11>--<18,1>
@@ -124,6 +126,11 @@ function getFileName(target) {
   return target.split(":")[0];
 }
 
+// 获取文件名
+function getFileName2(target) {
+  return target.split(":<")[0];
+}
+
 // 检查是否存在危险函数调用的函数
 // 函数调用之前插入一段检查代码，以确保被调用的函数不是危险的函数
 // 创建一个临时变量 tempVarID 用于保存函数调用的函数。
@@ -199,7 +206,7 @@ function generateBundlerConfig(dirname) {
         plugins: [nodeResolve({ moduleDirectories: ['node_modules'] }), commonjs(), babel(), json()]
       };`;
 
-  configBody = generate(parse(configBody, { sourceType: "unambiguous" }).program).code;
+  configBody = generate(parser.parse(configBody, { sourceType: "unambiguous" }).program).code;
   fs.writeFileSync(dirname + "/rollup.stubbifier.config.js", configBody);
 
 }
@@ -207,12 +214,58 @@ function generateBundlerConfig(dirname) {
 function getNumLinesSpannedByNode(n) {
   return n.loc.end.line - n.loc.start.line;
 }
+
+
+
+const SKIP_DIR = ['.nyc_output', '.git', 'coverage', 'test', 'build', 'docs', '__test__', 'changelogs']
+// 获取指定目录下的所有文件路径，并递归获取子目录中的文件路径
+function getAllFiles(dirname, recurse = true, listOfFiles = []) {
+  let baseListOfFiles = fs.readdirSync(dirname);
+
+  for (let i = 0; i < baseListOfFiles.length; i++) {
+    if (fs.statSync(dirname + "/" + baseListOfFiles[i]).isDirectory() &&
+      !SKIP_DIR.includes(baseListOfFiles[i]) &&
+      recurse) {
+      // console.log( );
+      // SKIP_DIR.indexOf(baseListOfFiles[i]!=-1) &&
+      listOfFiles = getAllFiles(dirname + "/" + baseListOfFiles[i], recurse, listOfFiles);
+    }
+    else {
+      if (baseListOfFiles[i].endsWith('js') || baseListOfFiles[i].endsWith('ts')) {
+        listOfFiles.push(path.join(dirname, baseListOfFiles[i]));
+      }
+
+    }
+  }
+  return listOfFiles;
+};
+// 确定是否应该对指定的文件进行stubbify操作
+function shouldStubbify(curPath, file, depList) {
+  let shouldStub = fs.lstatSync(curPath).isFile() &&  // 检查文件是否为普通文件而不是目录
+    file.substr(file.length - 2) == "js" && // 检查文件是否以 ".js" 结尾
+    file.indexOf("externs") == -1 && //  确保文件名中不包含 "externs"
+    file.indexOf("node_modules/@babel") == -1 && // 确保文件路径中不包含 "@babel" 目录
+    (file.indexOf("test") == -1 ||
+      file.indexOf("node_modules") > -1);
+  // 如果传入了依赖列表 depList，则检查文件是否在依赖列表中。如果文件位于 "node_modules" 目录下，确保其在依赖列表中
+  if (depList) {
+    let node_mod_index = curPath.split("/").indexOf("node_modules");
+    if (node_mod_index > -1) { // if it's a node_module and we have a dep list, need to make sure it's in the dep list 
+      shouldStub = shouldStub && (depList.indexOf(curPath.split("/")[node_mod_index + 1]) > -1);
+    }
+  }
+  return shouldStub;
+}
+
 exports.buildHappyName = buildHappyName;
 exports.generateNodeUID = generateNodeUID;
 exports.getTargetsFromACG = getTargetsFromACG;
 exports.getTargetsFromCoverageReport = getTargetsFromCoverageReport;
 exports.getUncoveredFunctions = getUncoveredFunctions;
 exports.getFileName = getFileName;
+exports.getFileName2 = getFileName2;
 exports.buildEvalCheck = buildEvalCheck;
 exports.generateBundlerConfig = generateBundlerConfig;
 exports.getNumLinesSpannedByNode = getNumLinesSpannedByNode;
+exports.getAllFiles = getAllFiles;
+exports.shouldStubbify = shouldStubbify;

@@ -276,7 +276,7 @@ function stubFunction(
     }).ast;
     // console.log(generate(ast).code)
     // write out the stub, overwriting the old file
-    fs.writeFileSync(filename, generator(ast).code.split('eval("STUB_FLAG_STUB_THIS_STUB_FCT");').join("\n"));
+    fs.writeFileSync(filename, generate(ast).code.split('eval("STUB_FLAG_STUB_THIS_STUB_FCT");').join("\n"));
     // make the directory, so there can be a file added to it for each function processed
     // only create the dir if it doesn't already exist
     if (!fs.existsSync(filename + ".dir")) {
@@ -324,7 +324,7 @@ function stubFunction(
                 };
             }]
         }).ast;
-        fs.writeFileSync(filename + ".dir/" + fctName + ".BIGG", generator(fileSpecAST).code);
+        fs.writeFileSync(filename + ".dir/" + fctName + ".BIGG", generate(fileSpecAST).code);
         // console.log(fctBody);
     });
     // Now that the directory is written, zip it up (if we want to).

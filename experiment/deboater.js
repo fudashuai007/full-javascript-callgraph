@@ -3,43 +3,21 @@ const path = require("path");
 const { stubFunction } = require("./stubFunction.js");
 const { flagFunctionForStubbing } = require("./functionFlagging.js");
 const stubFile = require("./stubFile.js");
-const { getTargetsFromCoverageReport, getTargetsFromACG, buildHappyName, getFileName } = require("./stubUtils.js");
+const { getTargetsFromCoverageReport,
+  getTargetsFromACG,
+  buildHappyName,
+  getFileName,
+  getFileName2,
+  getAllFiles,
+  shouldStubbify,
+  generateBundlerConfig
+} = require("./stubUtils.js");
 const { argv } = require("process");
 // const yargs = require("yargs");
 const { execSync } = require("child_process");
 
-// 获取指定目录下的所有文件路径，并递归获取子目录中的文件路径
-function getAllFiles(dirname, recurse = true, listOfFiles = []) {
-  let baseListOfFiles = fs.readdirSync(dirname);
-  baseListOfFiles.forEach(function (file) {
-    if (fs.statSync(dirname + "/" + file).isDirectory() && recurse) {
-      listOfFiles = getAllFiles(dirname + "/" + file, recurse, listOfFiles);
-    }
-    else {
-      listOfFiles.push(path.join(__dirname, dirname, "/", file));
-    }
-  });
-  return listOfFiles;
-};
-// 确定是否应该对指定的文件进行stubbify操作
-function shouldStubbify(curPath, file, depList) {
-  let shouldStub = fs.lstatSync(curPath).isFile() &&  // 检查文件是否为普通文件而不是目录
-    file.substr(file.length - 2) == "js" && // 检查文件是否以 ".js" 结尾
-    file.indexOf("externs") == -1 && //  确保文件名中不包含 "externs"
-    file.indexOf("node_modules/@babel") == -1 && // 确保文件路径中不包含 "@babel" 目录
-    (file.indexOf("test") == -1 ||
-      file.indexOf("node_modules") > -1);
-  // 如果传入了依赖列表 depList，则检查文件是否在依赖列表中。如果文件位于 "node_modules" 目录下，确保其在依赖列表中
-  if (depList) {
-    let node_mod_index = curPath.split("/").indexOf("node_modules");
-    if (node_mod_index > -1) { // if it's a node_module and we have a dep list, need to make sure it's in the dep list 
-      shouldStub = shouldStub && (depList.indexOf(curPath.split("/")[node_mod_index + 1]) > -1);
-    }
-  }
-  return shouldStub;
-}
 
-let bundlerMode = "bundle_and_stub"; // default: don't bundle
+let bundlerMode = "no"; // default: don't bundle
 let bundleOptions = {
   no: "no",
   only_bundle: "only_bundle",
@@ -60,13 +38,14 @@ let bundleOptions = {
 // }
 
 let testingMode = true;
+let safeEvalMode = false;
 let recurseThroughDirs = true;
-
-let filename = '../experiment/result/body-parser';
-console.log('Reading ' + filename);
+let pro_dir = 'body-parser'
+let cur_dir = 'result/body-parser';
+// console.log('Reading ' + filename);
 
 let callgraphpath = false;
-let coverageReportPath = '../experiment/result/body-parser/coverage/coverage-final.json';
+let coverageReportPath = path.join(cur_dir, 'coverage/coverage-final.json');
 let removeFunsPath = null;
 let functions = [];
 let listedFiles = [];
@@ -74,11 +53,12 @@ let removeFuns = [];
 let noCG = true;
 let uncoveredMode = true;
 let depList;
+
 // 静态分析
 if (callgraphpath) {
   let targets = getTargetsFromACG(callgraphpath);
   functions = targets.map(buildHappyName);
-  listedFiles = targets.map(getFileName);
+  listedFiles = targets.map(item => path.join(__dirname, getFileName(item)));
   noCG = false;
 }
 
@@ -90,25 +70,23 @@ if (removeFunsPath) {
 if (uncoveredMode) {
   let targets = getTargetsFromCoverageReport(coverageReportPath);
   functions = targets.map(buildHappyName);
-  let all_listedFiles = targets.map(getFileName);
+  let all_listedFiles = targets.map(getFileName2);
   all_listedFiles.forEach(element => {
     if (listedFiles.indexOf(element) == -1)
       listedFiles.push(element);
   });
   noCG = false;
-  console.log(listedFiles);
-  console.log(functions);
+  // console.log(listedFiles);
+  // console.log(functions);
 }
-
-if (argv.dependencies) {
-  depList = fs.readFileSync(argv.dependencies, 'utf-8').split("\n");
-}
+// console.log(path.join(__dirname,cur_dir, 'dep_list.txt'));
+depList = fs.readFileSync(path.join(__dirname, cur_dir, 'dep_list.txt'), 'utf-8').split("\n");
 
 if (bundlerMode != "no") {
   if (bundlerMode == "bundle_and_stub" || bundlerMode == "only_bundle") {
-    let files = getAllFiles(filename, recurseThroughDirs);
+    let files = getAllFiles(path.join(__dirname, cur_dir), recurseThroughDirs);
     files.forEach(function (file, index) {
-      let curPath = filename + file;
+      let curPath = cur_dir + file;
       curPath = file;
       if (shouldStubbify(curPath, file, depList)) { // don't even try to stub externs
         if (noCG || listedFiles.indexOf(curPath) > -1) { // file is reachable, so only stubify functions
@@ -118,6 +96,7 @@ if (bundlerMode != "no") {
           }
           catch (e) {
             console.log("ERROR: cannot stubbify function in: " + curPath);
+            console.log(e);
           }
         }
         else {
@@ -141,15 +120,15 @@ if (bundlerMode != "no") {
     // 2. Bundler needs to be called from the project being stubbified.
     // 3. Bundler config file is needed. 
     // create bundler config file
-    generateBundlerConfig(path.resolve(filename));
+    generateBundlerConfig(path.resolve(path.join(__dirname, cur_dir)));
     // cd into project directory (filename is the path to the tgt project)
     // save current directory first to chdir back
-    let stubsDir = process.cwd();
-    process.chdir(path.resolve(filename));
-    // call bundler
-    execSync('rollup --config rollup.stubbifier.config.js');
-    // cd back into stubbifier
-    process.chdir(stubsDir);
+    // let stubsDir = process.cwd();
+    // process.chdir(path.resolve(path.join(__dirname, cur_dir)));
+    // // call bundler
+    // execSync('rollup --config rollup.stubbifier.config.js');
+    // // cd back into stubbifier
+    // process.chdir(stubsDir);
   }
   // Once bundled, we need to read in the bundle and stubbify the functions with
   // the eval.
@@ -168,13 +147,12 @@ if (bundlerMode != "no") {
 }
 else {
   // stubbing section; no bundling 
-  if (fs.lstatSync(filename).isDirectory()) {
-    let files = getAllFiles(filename, recurseThroughDirs);
+  if (fs.lstatSync(path.resolve(path.join(__dirname, cur_dir))).isDirectory()) {
+    let files = getAllFiles(path.resolve(path.join(__dirname, cur_dir)), recurseThroughDirs);
     files.forEach(function (file, index) {
       // console.log(file);
       // only stubify JS files
-      let curPath = filename + file;
-      curPath = file;
+      let curPath = file
       // console.log("decision: " + shouldStubbify(curPath, file, depList));
       // let curAbsPath: string = process.cwd() + curPath;
       if (shouldStubbify(curPath, file, depList)) { // don't even try to stub externs
@@ -193,7 +171,7 @@ else {
           }
           catch (e) {
             console.log("ERROR: cannot stubbify function in: " + curPath);
-            // console.log(e);
+            console.log(e);
           }
         }
         else {
