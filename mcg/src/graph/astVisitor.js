@@ -7,7 +7,7 @@ const readlines = require('n-readlines');
 const traverse = require('@babel/traverse').default
 const { trimHashbangPrep,ts2js } = require('../utils/tool')
 const { errorLog } = require('../utils/log');
-const { file } = require('@babel/types');
+
 /** gnerate AST from files */
 function astFromFiles(files) {
   const ast = {
@@ -17,7 +17,7 @@ function astFromFiles(files) {
   }
 
   for (let file of files) {
-    if(file.indexOf('test')!=-1)continue;
+    // if(file.indexOf('test')!=-1)continue;
     try {
       let src = fs.readFileSync(file, 'utf-8');
       // console.log();

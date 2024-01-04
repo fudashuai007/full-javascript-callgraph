@@ -1,2 +1,1 @@
-// let arr = []
-// arr.map(() => { })
+function a() { }

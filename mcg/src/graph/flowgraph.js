@@ -29,33 +29,38 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             // R9
             case 'CallExpression':
                 // 添加从成员表达式的对象顶点到第一个参数顶点的边。
-                if (nd.callee.type === 'MemberExpression'){
+                if (nd.callee.type === 'MemberExpression') {
                     if (!flow_graph.hasEdge(vertexFor(nd.callee.object), argVertex(nd, 0))) {
                         flow_graph.addEdge(vertexFor(nd.callee.object), argVertex(nd, 0));
                     }
-                
+
                 }
-                   
-                if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression'){
+
+                if (nd.callee.type === 'ParenthesizedExpression' || nd.callee.type === 'FunctionExpression') {
                     if (!flow_graph.hasEdge(vertexFor(nd.attr.callee), calleeVertex(nd))) {
                         flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
                         // flow_graph.addEdge(vertexFor(nd.callee.object), argVertex(nd, 0));
                     }
                 }
-                   
+
             // R8 FALL THROUGH
             case 'NewExpression':
                 // 添加从构造函数（callee）顶点到调用者顶点的边
                 const startVertex = vertexFor(nd.callee)
                 let mes = nd.attr.enclosingFile + '<' + nd.loc.start.line + ',' + nd.loc.start.column + '>--<' + nd.loc.end.line + ',' + nd.loc.end.column + '>'
-               
-                if (startVertex.infos && startVertex.infos.size >0 && startVertex.infos.has(mes)) {
+
+                if (startVertex.infos && startVertex.infos.size > 0 && startVertex.infos.has(mes)) {
                     if (!flow_graph.hasEdge(startVertex, calleeVertex(nd, mes))) {
-                    flow_graph.addEdge(startVertex, calleeVertex(nd, mes));
+                        flow_graph.addEdge(startVertex, calleeVertex(nd, mes));
                     }
-                } else if (startVertex.data != undefined) {
+                } else if (startVertex.paramIndex != undefined) {
                     if (!flow_graph.hasEdge(startVertex, calleeVertex(nd, startVertex.data))) {
-                    flow_graph.addEdge(startVertex, calleeVertex(nd, startVertex.data));
+                        flow_graph.addEdge(startVertex, calleeVertex(nd, startVertex.paramIndex));
+                    }
+                }
+                else if (startVertex.data != undefined) {
+                    if (!flow_graph.hasEdge(startVertex, calleeVertex(nd, startVertex.data))) {
+                        flow_graph.addEdge(startVertex, calleeVertex(nd, startVertex.data));
                     }
                 } else {
                     // console.log(flow_graph.hasEdge(startVertex, calleeVertex(nd)));
@@ -67,19 +72,19 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
 
                 // console.log(nd);
                 //遍历调用表达式的参数，并在流图中添加从每个参数顶点到对应的参数顶点（按顺序递增 1）的边
-                for (var i = 0; i <= nd.arguments.length; ++i){
+                for (var i = 0; i <= nd.arguments.length; ++i) {
                     if (!flow_graph.hasEdge(vertexFor(nd.arguments[i]), argVertex(nd, i))) {
                         flow_graph.addEdge(vertexFor(nd.arguments[i]), argVertex(nd, i));
                     }
-                 
+
                 }
                 if (!flow_graph.hasEdge(resVertex(nd), vertexFor(nd))) {
-                    
-                // 添加从调用结果顶点到调用表达式顶点的边
+
+                    // 添加从调用结果顶点到调用表达式顶点的边
                     flow_graph.addEdge(resVertex(nd), vertexFor(nd));
                     break;
                 }
-           
+
 
             case 'CatchClause':
                 if (!nd.param) {
@@ -125,11 +130,11 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
             case 'FunctionExpression':
             case 'ArrowFunctionExpression':
                 if (!flow_graph.hasEdge(funcVertex(nd), exprVertex(nd))) {
-                flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
+                    flow_graph.addEdge(funcVertex(nd), exprVertex(nd));
                 }
                 for (let i = 0; i < nd.params.length; i++) {
                     if (!flow_graph.hasEdge(vertexFor(nd.id), vertexFor(nd.params[i + 1]))) {
-                    flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i + 1]))
+                        flow_graph.addEdge(vertexFor(nd.id), vertexFor(nd.params[i + 1]))
                     }
                 }
                 if (nd.attr.parent.type === 'ParenthesizedExpression') {
@@ -137,8 +142,9 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                 } else {
                     if (nd.id) {
                         if (!flow_graph.hasEdge(funcVertex(nd), varVertex(nd.id))) {
-                        flow_graph.addEdge(funcVertex(nd), varVertex(nd.id)); // 添加从函数值顶点到函数标识符顶点的边F
-                    }}
+                            flow_graph.addEdge(funcVertex(nd), varVertex(nd.id)); // 添加从函数值顶点到函数标识符顶点的边F
+                        }
+                    }
                 }
 
                 break;
@@ -241,7 +247,7 @@ function vertexFor(nd, data) {
                 decl = nd.attr.scope.get(nd.name);
             return decl && !decl.attr.scope.global ?
                 varVertex(decl) : data != undefined ?
-                    globParamsVertex(nd, data) : propVertex(nd);
+                    globParamsVertex(nd, data) : globVertex(nd);
         case 'ThisExpression':
             // 'this' is treated like a variable
             decl = nd.attr.scope.get('this');
@@ -305,10 +311,9 @@ function propVertex(nd, data) {
     else
         throw new Error("invalid property vertex");
     if (data) {
-        console.log(propVertices.get(p))
         let propVer = propVertices.get(p, {
             name: p,
-            paramIndex:data?data:undefined,
+            paramIndex: data ? data : undefined,
             attr: {
                 pp: function () { return 'Prop(' + p + ')'; }
             },
@@ -483,7 +488,7 @@ function calleeVertex(nd, data) {
         });
 
     if (data != undefined) {
-        if (data.indexOf('>--<') != -1) {
+        if (('' + data).indexOf('>--<') != -1) {
             resultVertex['mes'] = nd.attr.enclosingFile + '<' + nd.loc.start.line + ',' + nd.loc.start.column + '>--<' + nd.loc.end.line + ',' + nd.loc.end.column + '>'
         } else {
             resultVertex['paramIndex'] = data

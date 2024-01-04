@@ -16,8 +16,8 @@ const options = {
   // analysisDir: 'src/test/Data/jshint/src',
   // analysisDir: 'src/test/exper',
   // analysisDir: 'src/test/Data/debug/src',
-  analysisDir: 'src/result/memfs/src',
-  // analysisDir: 'src/test/test/dir',
+  // analysisDir: 'src/result/memfs/src',
+  analysisDir: 'mcg/src/test/exper',
   output: ['a.json', 'b.json'],
   style: 'v8',
   time: true,
@@ -189,7 +189,7 @@ function main() {
   }
 
 
-  // console.log(options.output);
+  console.log(result);
   // result = result.filter(item => item.source.label != item.target.label)
   // console.log(styleResult);
 
@@ -231,5 +231,4 @@ function main() {
   }
   return result;
 
-  console.log(result);
 }

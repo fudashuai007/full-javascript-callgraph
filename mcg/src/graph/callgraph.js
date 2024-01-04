@@ -45,13 +45,15 @@ function get_fake_root(path) {
 function extractCG(ast, flow_graph) {
 
     var edges = new graph.Graph()
+    let callToFn = new Map()
     escaping = [], unknown = [];
 
     var reach = dftc.reachability(flow_graph);
 
     /* fn is a flow graph node of type 'FuncVertex' */
-    function    processFuncVertex(fn) {
+    function processFuncVertex(fn) {
         var r = reach.getReachable(fn)
+
         let addEdgeFlag = true, pathPatch = false, nativeCalled = false
         let fnPaths = [], fnIndex, propData, fnProp
 
@@ -76,71 +78,85 @@ function extractCG(ast, flow_graph) {
                 if (r[i].type === 'UnknownVertex')
                     escaping[escaping.length] = fn;
                 else if (r[i].type === 'CalleeVertex') {
-                        let callPath = r[i].call.attr.path.split(' ')
-                        addEdgeFlag = true
+                    let callPath = r[i].call.attr.path.split(' ')
+                    addEdgeFlag = true
 
-                        /**
-                         * 
-                         * 如果函数调用中有paramIndex，
-                         * 如果有，表示改函数调用结果来自于参数，进一步查看函数中是否有这个函数声明的索引
-                         *      如果没有，则说明这俩匹配不上，直接跳过
-                         *      如果有，则需要进一步查看函数声明中的索引和函数调用中的paramIndex是否匹配
-                         *          如果相等，则说明改函数与函数调用匹配
-                         *          如果不相等，则说明该函数与函数调用不匹配
-                         * 
-                         * 如果没有，则表示改函数调用并不是来自于函数传参，判断函数中是否有函数声明的索引
-                         *  如果有，则不匹配
-                         *  如果没有，匹配
-                         *  */
+                    /**
+                     * 
+                     * 如果函数调用中有paramIndex，
+                     * 如果有，表示改函数调用结果来自于参数，进一步查看函数中是否有这个函数声明的索引
+                     *      如果没有，则说明这俩匹配不上，直接跳过
+                     *      如果有，则需要进一步查看函数声明中的索引和函数调用中的paramIndex是否匹配
+                     *          如果相等，则说明改函数与函数调用匹配
+                     *          如果不相等，则说明该函数与函数调用不匹配
+                     * 
+                     * 如果没有，则表示改函数调用并不是来自于函数传参，判断函数中是否有函数声明的索引
+                     *  如果有，则不匹配
+                     *  如果没有，匹配
+                     *  */
 
-                        if (r[i].paramIndex != undefined) {
-                            if (fnIndex == undefined) {
-                                continue
-                            } else {
-                                if (fnIndex == r[i].paramIndex) {
-                                        edges.addEdge(r[i], fn);
-                                        r[i].visited = true
-
-                                } else {
-                                    continue
-                                }
-                            }
+                    if (r[i].paramIndex != undefined) {
+                        if (fnIndex == undefined) {
+                            continue
                         } else {
-                            if (fnIndex != undefined) {
-                                    if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1 && fnProp && fnProp === r[i].mes) {
-                                        edges.addEdge(nativeCalleeVertex(r[i]), fn);
-                                    }
+                            if (fnIndex == r[i].paramIndex) {
+                                edges.addEdge(r[i], fn);
+                                r[i].visited = true
 
-                                continue
                             } else {
-                                // 优先去做路径匹配，路径匹配失效，再去直接匹配字符
-
-                                // let j = callPath.length - 1
-                                // for (; j >= 0; j--) {
-                                //     if (fnPaths.indexOf(callPath[j]) == -1) break
-                                // }
-                                // if(j==-1){
-                                //     edges.addEdge(r[i], fn);
-                                //     r[i].visited = true
-                                //     fn.visited = true
-                                // }
-                                // if(!fn.visited){
-                                if (nativeCalled) {
-                                    if (r[i].mes && fnProp === r[i].mes) {
-                                            edges.addEdge(nativeCalleeVertex(r[i]), fn);
-                                            continue
-                                    }
-
-                                } else {
-                                        edges.addEdge(r[i], fn);
-                                        r[i].visited = true
-                                }
-
-                                // }
-
+                                continue
                             }
                         }
-    
+                    } else {
+                        if (fnIndex != undefined) {
+                            if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1 && fnProp && fnProp === r[i].mes) {
+                                edges.addEdge(nativeCalleeVertex(r[i]), fn);
+                            }
+
+                            continue
+                        } else {
+
+                            if (nativeCalled) {
+                                if (r[i].mes && fnProp === r[i].mes) {
+                                    edges.addEdge(nativeCalleeVertex(r[i]), fn);
+                                    continue
+                                }
+
+                            } else {
+                                // 优先去做路径匹配，路径匹配失效，再去直接匹配字符
+                                // if(r[i])
+                                // let j = callPath.length - 1, matchCount = 0
+                                // for (; j >= 0; j--) {
+                                //     if (fnPaths.indexOf(callPath[j]) == -1) break
+                                //     else {
+                                //         matchCount++
+                                //     }
+                                // }
+                                // fn['matchCount'] = matchCount
+                                // if (j == -1) {
+                                //     edges.addEdge(r[i], fn);
+                                //     callToFn.delete(r[i].call.attr.path)
+                                //     r[i].visited = true
+                                // } else {
+                                //     if (callToFn.has(r[i].call.attr.path)) {
+                                //         callToFn.set(r[i].call.attr.path, callToFn.get(r[i].call.attr.path).push({ call: r[i], fn: fn }))
+                                //     } else {
+                                //         callToFn.set(r[i].call.attr.path, [{ call: r[i], fn: fn }])
+
+                                //     }
+
+                                // }
+                                edges.addEdge(r[i], fn);
+                                r[i].visited = true
+                                // if(!fn.visited){
+
+                            }
+
+                            // }
+
+                        }
+                    }
+
 
                 }
             }
@@ -151,7 +167,7 @@ function extractCG(ast, flow_graph) {
                 if (r[i].type === 'UnknownVertex')
                     escaping[escaping.length] = fn;
                 else if (r[i].type === 'CalleeVertex' && !r[i].visited) {
-                        edges.addEdge(r[i], fn);
+                    edges.addEdge(r[i], fn);
                 }
             }
         }
@@ -168,11 +184,11 @@ function extractCG(ast, flow_graph) {
             call: nd,
             attr: {
                 pp: function () {
-                    return `Callee(nativeCall)<${nd.call.loc.start.line+','+nd.call.loc.start.column}>`;
+                    return `Callee(nativeCall)<${nd.call.loc.start.line + ',' + nd.call.loc.start.column}>`;
                 }
             },
-            loc:nd.call.loc,
-            name:tool.getNativeName(nd.call.attr.path),
+            loc: nd.call.loc,
+            name: tool.getNativeName(nd.call.attr.path),
             visited: false
         };
 

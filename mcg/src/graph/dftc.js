@@ -139,48 +139,6 @@ function reachability(graph) {
       }
 
       return ret;
-    },
-    iterReachable: function (src, cb) {
-      const nodeStr = nd2str(src);
-      if (!(nodeStr in str2rid)) {
-        enum_nodes.push(src);
-        visited.push(0);
-        visited2.push(0);
-        popped.push(0);
-        m.push(new Set());
-        t.push(new Set());
-        str2rid[nodeStr] = enum_nodes.length - 1;
-      }
-      const src_id = str2rid[nodeStr];
-
-      if (visited[src_id] == 0)
-        visit1(src_id);
-
-      var tc = new Set(m[src_id]);
-      for (let elem of t[src_id].values())
-        tc.add(elem);
-
-      for (let elem of tc.values())
-        cb(enum_nodes[elem]);
-    },
-    reaches: function (src, dest) {
-      const src_id = str2rid[nd2str(src)];
-      const dest_id = str2rid[nd2str(dest)];
-
-      if (visited[src_id] == 0)
-        visit1(src_id);
-
-      var tc = new Set(m[src_id]);
-      for (let elem of t[src_id].values())
-        tc.add(elem);
-
-      return tc.has(dest_id);
-    },
-    removeReaches:function(source,target){
-      const sour_id = str2rid[nd2str(source)];
-      const targ_id = str2rid[nd2str(target)];
-      m[targ_id].delete(sour_id)
-      // m.splice(nodeStr,1)
     }
   };
 };
