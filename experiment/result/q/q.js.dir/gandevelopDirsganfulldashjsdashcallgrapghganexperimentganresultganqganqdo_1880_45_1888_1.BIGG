@@ -1,0 +1,11 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1880_45_1888_1 = function (timeout) {
+  return this.then(function (value) {
+    var deferred = defer();
+    setTimeout(function () {
+      deferred.resolve(value);
+    }, timeout);
+    return deferred.promise;
+  });
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1880_45_1888_1;

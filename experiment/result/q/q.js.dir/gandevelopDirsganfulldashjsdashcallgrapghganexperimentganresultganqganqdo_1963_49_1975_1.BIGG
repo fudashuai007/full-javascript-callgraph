@@ -1,0 +1,15 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1963_49_1975_1 = function (callback, thisp /*...args*/) {
+  var baseArgs = array_slice(arguments, 2);
+  return function () {
+    var nodeArgs = baseArgs.concat(array_slice(arguments));
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    function bound() {
+      return callback.apply(thisp, arguments);
+    }
+    Q(bound).fapply(nodeArgs).fail(deferred.reject);
+    return deferred.promise;
+  };
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1963_49_1975_1;

@@ -1,0 +1,18 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1776_51_1791_1 = function (callback) {
+  if (!callback || typeof callback.apply !== "function") {
+    throw new Error("Q can't apply finally callback");
+  }
+  callback = Q(callback);
+  return this.then(function (value) {
+    return callback.fcall().then(function () {
+      return value;
+    });
+  }, function (reason) {
+    // TODO attempt to recycle the rejection with "this".
+    return callback.fcall().then(function () {
+      throw reason;
+    });
+  });
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1776_51_1791_1;

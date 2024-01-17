@@ -1,0 +1,17 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_876_27_892_5 = function () {
+  self.promiseDispatch(function (value) {
+    if (done) {
+      return;
+    }
+    done = true;
+    deferred.resolve(_fulfilled(value));
+  }, "when", [function (exception) {
+    if (done) {
+      return;
+    }
+    done = true;
+    deferred.resolve(_rejected(exception));
+  }]);
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_876_27_892_5;

@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path')
 const readlines = require('n-readlines');
 const traverse = require('@babel/traverse').default
-const { trimHashbangPrep,ts2js } = require('../utils/tool')
+const { trimHashbangPrep, ts2js } = require('../utils/tool')
 const { errorLog } = require('../utils/log');
 
 /** gnerate AST from files */
@@ -45,7 +45,7 @@ function init(fname, root) {
   var enclosingFunction = null, enclosingFile = null;
 
   // global collections containing all functions and all call sites
-  root.attr = {}
+  root['attr'] = {}
   root.attr.functions = new Map()
   root.attr.children = []
   root.attr.calls = [];
@@ -86,10 +86,10 @@ function init(fname, root) {
           nd.callee.object.type === 'Identifier' && nd.callee.object.name === 'require' &&
           nd.property.type === 'Identifier' && nd.property.name === 'resolve'
         ) {
-          if ((nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('./') != -1)
-            || (nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('../') != -1)) {
-            root.attr.children.push(nd.arguments[0].value)
-          }
+          // if ((nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('./') != -1)
+          //   || (nd.arguments[0].type === 'Literal' && nd.arguments[0].value.indexOf('../') != -1)) {
+          root.attr.children.push(nd.arguments[0].value)
+          // }
 
         }
       }
@@ -354,9 +354,51 @@ function nodePath2nodeMap(ast) {
   }
 }
 
-function mergeAst(ast) {
-  // console.log([...ast.programs.entries()]);'
-  let forest = []
+function mergeAst(ast, dir,entry) {
+  let main = path.join(dir, entry)
+  let forest = [], visitedFile = []
+  let s_ast = {}
+  s_ast.programs = []
+  
+  s_ast.functions = []
+  s_ast.calls = []
+  s_ast.name=main
+  // s_ast.kids=[]
+  if (ast.programs.has(main)) {
+    let sub_ast = ast.programs.get(main)
+    if (sub_ast.merged) {
+      //  = s_ast.programs.concat(sub_ast)
+      // 对于先遍历的文件，但是没有是否被引入到其他文件的情况，先合并这个先遍历的文件，然后在森林中删除
+      let forestIndex = forest.findIndex(item => item.name === main)
+      if (forestIndex != -1) {
+        s_ast.programs = s_ast.programs.concat(forest[forestIndex].programs)
+        s_ast.calls = s_ast.calls.concat(forest[forestIndex].calls)
+        s_ast.functions = s_ast.functions.concat(forest[forestIndex].functions)
+
+        forest.splice(forestIndex, 1)
+      }
+
+    } else { // 文件没有被访问过
+      sub_ast.merged = true
+      sub_ast.kids = []
+      // s_ast.origin_program=sub_ast
+      s_ast.programs.push(sub_ast)
+      s_ast.calls = s_ast.calls.concat(sub_ast.attr.calls)
+      s_ast.functions = s_ast.functions.concat([...sub_ast.attr.functions.values()])
+      s_ast.kids = []
+      s_ast.name=main
+      visitedFile.push(main)
+      // forest.find(item=>item.name === filePath)
+      if (sub_ast.attr.children.length > 0) {
+        doVisit(s_ast, sub_ast.attr.children, main, ast)
+        sub_ast.kids = sub_ast.kids.concat(s_ast.kids)
+      }
+      forest.push(s_ast)
+      // visitedFile.push(s_ast)
+    }
+
+
+  }
   for (const [key, value] of ast.programs.entries()) {
     if (value.merged) continue
     else {
@@ -365,107 +407,138 @@ function mergeAst(ast) {
       s_ast.functions = [].concat(...value.attr.functions.values())
       s_ast.calls = [].concat(value.attr.calls)
       s_ast.programs = []
+      s_ast.kids = []
       s_ast.name = key
       s_ast.programs.push(value)
       let dir = path.dirname(key), filePath
-      value.attr.children.forEach(item => {
-        filePath = path.join(dir, item)
 
-        // console.log(fs.existsSync(filePath));
+      // value.attr.children.forEach(item => {
+      //   filePath = path.join(dir, item ? item : '')
+      //   if (fs.existsSync(filePath) && fs.lstatSync(filePath).isDirectory()) {
+      //     try {
+      //       const files = fs.readdirSync(filePath);
+      //       if (files.includes('index.js')) {
+      //         filePath = path.join(filePath, 'index.js')
+      //       } else if (files.includes('index.ts')) {
+      //         filePath = path.join(filePath, 'index.ts')
+      //       }
+      //     } catch (err) {
+      //       console.error(err);
+      //     }
+      //   }
+      //   if (!(filePath.endsWith('.js') || filePath.endsWith('.ts'))) {
+      //     if (ast.programs.has(filePath + '.js')) {
+      //       filePath = filePath + '.js'
+      //     } else if (ast.programs.has(filePath + '.ts')) {
+      //       filePath = filePath + '.ts'
+      //     }
+      //   }
+      //   if (ast.programs.has(filePath)
+      //   ) {
+      //     let sub_ast = ast.programs.get(filePath)
+      //     if (sub_ast.merged) {
+      //       //  = s_ast.programs.concat(sub_ast)
+      //       // 对于先遍历的文件，但是没有是否被引入到其他文件的情况，先合并这个先遍历的文件，然后在森林中删除
+      //       let forestIndex = forest.findIndex(item => item.name === filePath)
+      //       if (forestIndex != -1) {
+      //         s_ast.programs = s_ast.programs.concat(forest[forestIndex].programs)
+      //         s_ast.calls = s_ast.calls.concat(forest[forestIndex].calls)
+      //         s_ast.functions = s_ast.functions.concat(forest[forestIndex].functions)
+      //         forest.splice(forestIndex, 1)
+      //       }
 
-        if (fs.existsSync(filePath) &&fs.lstatSync(filePath).isDirectory()) {
-          try {
-            const files = fs.readdirSync(filePath);
-            if (files.includes('index.js')) {
-              filePath = path.join(filePath, 'index.js')
-            } else if (files.includes('index.ts')) {
-              filePath = path.join(filePath, 'index.ts')
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        }
-        if (!(filePath.endsWith('.js') || filePath.endsWith('.ts'))) {
-          if (ast.programs.has(filePath + '.js')) {
-            filePath = filePath + '.js'
-          } else if (ast.programs.has(filePath + '.ts')) {
-            filePath = filePath + '.ts'
-          }
-        }
-        if (ast.programs.has(filePath)
-        ) {
-          let sub_ast = ast.programs.get(filePath)
-          if (sub_ast.merged) {
-            //  = s_ast.programs.concat(sub_ast)
-            // 对于先遍历的文件，但是没有是否被引入到其他文件的情况，先合并这个先遍历的文件，然后在森林中删除
-            let forestIndex = forest.findIndex(item => item.name === filePath)
-            if (forestIndex != -1) {
-              s_ast.programs = s_ast.programs.concat(forest[forestIndex].programs)
-              s_ast.calls = s_ast.calls.concat(forest[forestIndex].calls)
-              s_ast.functions = s_ast.functions.concat(forest[forestIndex].functions)
-              forest.splice(forestIndex, 1)
-            }
+      //     } else { // 文件没有被访问过
+      //       sub_ast.merged = true
+      //       sub_ast.kids = []
+      //       s_ast.programs.push(sub_ast)
+      //       s_ast.calls = s_ast.calls.concat(sub_ast.attr.calls)
+      //       s_ast.functions = s_ast.functions.concat([...sub_ast.attr.functions.values()])
+      //       // forest.find(item=>item.name === filePath)
+      //       if (sub_ast.attr.children.length > 0) {
+      //         doVisit(s_ast, sub_ast.attr.children, filePath, ast)
+      //         s_ast.kids=s_ast.kids.concat(sub_ast.kids)
+      //       }
+      //     }
 
-          } else { // 文件没有被访问过
-            sub_ast.merged = true
-            s_ast.programs.push(sub_ast)
-            s_ast.calls = s_ast.calls.concat(sub_ast.attr.calls)
-            s_ast.functions = s_ast.functions.concat([...sub_ast.attr.functions.values()])
-            // forest.find(item=>item.name === filePath)
-            if (sub_ast.attr.children.length > 0) {
-              doVisit(s_ast, sub_ast.attr.children, filePath, ast)
-            }
-          }
+      //   }
 
-        }
-
-      })
-
+      // })
+     doVisit(s_ast, value.attr.children, dir, ast,'sub')
+    //  s_ast.kids = s_ast.kids.concat(s_ast.kids)
       // console.log(s_ast);
       forest.push(s_ast)
+      // children.push(s_ast)
     }
   }
+  // }
+
 
   function doVisit(root, children, f_path, allAst) {
+    if (!root.kids) root.kids = []
     children.forEach(item => {
-      let fname = path.join(path.dirname(f_path), item)
-      // console.log(fname);
-      if (fs.existsSync(fname) && fs.lstatSync(fname).isDirectory()) {
-        try {
-          const files = fs.readdirSync(fname);
-          if (files.includes('index.js')) {
-            fname = path.join(fname, 'index.js')
-          } else if (files.includes('index.ts')) {
-            filePath = path.join(fname, 'index.ts')
+      if(!item){
+        item = 'index.js'
+      }
+      let fname
+      if (item.includes('.')) {
+        fname = path.join(path.dirname(f_path), item)
+      } else {
+        fname = path.join(path.dirname(f_path), 'node_modules', item)
+        if (!fs.existsSync(fname)) {
+          fname = path.join(path.dirname(f_path), '../', item)
+          if (!fs.existsSync(fname)) {
+            fname = path.join(path.dirname(f_path), '../node_modules', item)
           }
-        } catch (err) {
-          console.error(err);
         }
+        // fname = path.join(path.dirname(f_path), item)
       }
       if (!(fname.endsWith('.js') || fname.endsWith('.ts'))) {
         if (ast.programs.has(fname + '.js')) {
           fname = fname + '.js'
         } else if (ast.programs.has(fname + '.ts')) {
           fname = fname + '.ts'
+        } else {
+          if (fs.existsSync(fname) && fs.lstatSync(fname).isDirectory()) {
+            try {
+              const files = fs.readdirSync(fname);
+              if (files.includes('index.js')) {
+                fname = path.join(fname, 'index.js')
+              } else if (files.includes('index.ts')) {
+                fname = path.join(fname, 'index.ts')
+              } else {
+                fname = path.join(fname, item + '.js')
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
         }
       }
 
       if (allAst.programs.has(fname)) {
         let s_ast = allAst.programs.get(fname)
+        if (!s_ast.kids) s_ast.kids = []
+        s_ast.kids.push(fname)
         if (!s_ast.merged) {
           s_ast.merged = true
           root.programs.push(s_ast)
           root.calls = root.calls.concat(s_ast.attr.calls)
           root.functions = root.functions.concat([...s_ast.attr.functions.values()])
+
+
           if (s_ast.attr.children.length > 0) {
-            doVisit(root, s_ast.attr.children, f_path, allAst)
+            doVisit(root, s_ast.attr.children, fname, allAst)
+            root.kids = root.kids.concat(s_ast.kids)
           }
+          visitedFile.push(fname)
 
         }
       }
     })
 
   }
+
+
   return forest
   // console.log(ast);
 }
@@ -619,51 +692,93 @@ function ppPos(nd) {
   return basename(nd.attr.enclosingFile) + "@" + nd.loc.start.line + ":" + nd.range[0] + "-" + nd.range[1];
   // return nd.attr.enclosingFile + ":" + nd.loc.start.line + ":" + Number(Number(nd.loc.start.column) + 1);
 }
-function ppPos(nd, bdir, v8,flag) {
-  let basePath
-  if(flag){
-    basePath = nd.call.func.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/");
-  }else
-      basePath = nd.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/");
-  if (basePath.startsWith("/")) {
-          basePath = basePath.substring(1);
+function ppPos2(nd, bdir, v8, flag) {
+  let basePath, newCol
+  if (flag) {
+    if (flag == 'nativeFunc') {
+      basePath = nd.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/") + '(Native)';
+      newCol = colNum2V8(Number(nd.loc.start.line),
+        Number(nd.loc.start.column),
+        nd.attr.enclosingFile, 'not-function');
+    } else if (flag == 'nativeCallee') {
+      basePath = nd.call.call.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/") + '(Native)';
+      if (!nd.call.call.attr.enclosingFunction) {
+        return basePath + ":<1,0>--<1,0>"
       }
-      let newCol 
-  if(flag){
-    newCol = v8 ? colNum2V8(Number(nd.loc.start.line), Number(nd.loc.start.column), nd.call.func.attr.enclosingFile, nd.call.func) : Number(Number(nd.loc.start.column) + 1);
-  }else{
-    newCol = v8 ? colNum2V8(Number(nd.loc.start.line), Number(nd.loc.start.column), nd.attr.enclosingFile, nd) : Number(Number(nd.loc.start.column) + 1);
-  }
-    
-      return basePath + ":" + nd.loc.start.line + ":" + newCol;
-  }
-  
-  function colNum2V8(ln, col, bdir, nd) {
-      if (basename(bdir) === "entry") {
-          return col+1;
+      newCol = colNum2V8(
+        Number(nd.call.call.attr.enclosingFunction.loc.start.line),
+        Number(nd.call.call.attr.enclosingFunction.loc.start.column),
+        nd.call.call.attr.enclosingFile, 'function');
+    }
+    if (basePath.startsWith("/")) {
+      basePath = basePath.substring(1);
+    }
+    if (flag == 'nativeFunc')
+      return basePath
+    else {
+      return basePath + ":<" + nd.call.call.attr.enclosingFunction.loc.start.line + "," + newCol + '>--<' + nd.call.call.attr.enclosingFunction.loc.end.line + "," + nd.call.call.attr.enclosingFunction.loc.end.column + '>'
+    }
+  } else {
+    basePath = nd.attr.enclosingFile.replace(bdir, "").replace(/\\/g, "/");
+    if (nd.type === 'FunctionDeclaration' ||
+      nd.type === 'FunctionExpression' ||
+      nd.type === 'ArrowFunctionExpression') {
+      newCol = v8 ? colNum2V8(Number(nd.loc.start.line),
+        Number(nd.loc.start.column),
+        nd.attr.enclosingFile,
+        'function') : Number(Number(nd.loc.start.column) + 1);
+    } else {
+      newCol = colNum2V8(Number(nd.loc.start.line),
+        Number(nd.loc.start.column),
+        nd.attr.enclosingFile,
+        'function')
+      if (basePath.startsWith("/")) {
+        basePath = basePath.substring(1);
       }
-  
-     let liner = new readlines(bdir);
-     let lCount = 0;
-     let next;
-     let newCol = col;
-     while (next = liner.next()) {
-         lCount++;
-         if (lCount === ln) {
-             var line = next.toString("utf-8");
-             if (!line.substring(col).includes("=>")) {
-                 while(line.charAt(newCol) !== '(') {
-                     newCol++;
-                     if (newCol > line.length) {
-                          newCol = 0;
-                          break;
-                     }
-                 }
-             }
-         }
-     }
-     return newCol + 1;
-  
+
+    }
+    if (basePath.startsWith("/")) {
+      basePath = basePath.substring(1);
+    }
+
+    return basePath + ":<" + nd.loc.start.line + "," + newCol + '>--<' + nd.loc.end.line + "," + nd.loc.end.column + '>'
+    // return basePath + "<" + nd.loc.start.line + ":" + nd.loc.start.column + "," + nd.loc.end.line + ":" + nd.loc.end.column+'>';
+  }
+
+
+
+}
+
+function colNum2V8(ln, col, bdir, type) {
+  let endTag = {
+    "function": "{",
+    "not-function": "("
+  }
+  if (basename(bdir) === "entry") {
+    return col + 1;
+  }
+
+  let liner = new readlines(bdir);
+  let lCount = 0;
+  let next;
+  let newCol = col;
+  while (next = liner.next()) {
+    lCount++;
+    if (lCount === ln) {
+      var line = next.toString("utf-8");
+      if (!line.substring(col).includes("=>")) {
+        while (line.charAt(newCol) !== endTag[type]) {
+          newCol++;
+          if (newCol > line.length) {
+            newCol = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return type === 'function' ? newCol : (newCol + 1);
+
 }
 /* Parse a single source file and return its ast
 Args:
@@ -679,7 +794,7 @@ function buildProgram(fname, src) {
   src = trimHashbangPrep(src);
   if (fname.endsWith('ts')) {
     try {
-      
+
       src = ts2js(fname, src);
     } catch (error) {
       errorLog(error, `failed to transform ${fname} into javascript`)
@@ -746,7 +861,7 @@ function preProcess(ast, fname) {
         if (path.key === 'right') {
           path.node.id = {
             type: 'Identifier',
-            name: path.parent.left.name,
+            name: path.parent.left.name || path.parent.left.property.name || fname + '-anonymous' + anonymousID++ + '-<' + path.node.loc.start.line + ',' + path.node.loc.start.column + '>',
             range: path.node.range,
             loc: path.node.loc,
             functionType: path.type
@@ -967,6 +1082,7 @@ module.exports.visitWithState = visitWithState;
 module.exports.init = init;
 module.exports.mergeAst = mergeAst;
 module.exports.ppPos = ppPos;
+module.exports.ppPos2 = ppPos2;
 module.exports.funcname = funcname;
 module.exports.encFuncName = encFuncName;
 module.exports.astFromFiles = astFromFiles;

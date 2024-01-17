@@ -1,0 +1,16 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_990_23_998_1 = function nearer(value) {
+  if (isPromise(value)) {
+    var inspected = value.inspect();
+    if (inspected.state === "fulfilled") {
+      return inspected.value;
+    }
+  }
+  return value;
+}
+
+/**
+ * @returns whether the given object is a promise.
+ * Otherwise it is a fulfilled value.
+ */; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_990_23_998_1;

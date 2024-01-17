@@ -2,16 +2,19 @@
 const babel = require("@babel/types");
 const path = require('path')
 const fs = require('fs')
-const parser=require('@babel/parser');
-const generate  = require('@babel/generator').default;
+const parser = require('@babel/parser');
+const readlines = require('n-readlines');
+const generate = require('@babel/generator').default;
 // 文件路径或位置信息的格式化
 function buildHappyName(sad) {
   /* 输入: acorn/src/location.js:<12,11>--<18,1>
      输出: acorn_src_location_12_11_18_1
   */
+  //  sad='acorn/src/location.js:<12,11>--<18,1>'
   var happyName = "";
   // 将输入字符串中的点（.）替换为 'dot'，
   // 将破折号（-）替换为 'dash'。这一步是为了对输入的字符串进行清理和规范化
+  // sad = sad.replace(/\./g, 'dot').replace(/-/g, 'dash');
   sad = sad.replace(/\./g, 'dot').replace(/-/g, 'dash');
 
   var split = sad.split(/.js:<|.ts:</);
@@ -20,77 +23,146 @@ function buildHappyName(sad) {
   }
   happyName += split[0].replace(/\//g, '_') + '_';
   happyName += split[1].substring(0, split[1].length - 1).replace(/,/g, '_').replace('>dashdash<', '_');
+  // happyName += split[1].substring(0, split[1].length - 1).replace(/,/g, '_').replace(/\'dash\'/g, '_');
   return happyName;
 }
 // 生成函数id
 function generateNodeUID(n, filename, coverageMode) {
+  // console.log(n);
   // acorn/src/location.js:<12,12>--<18,1>
   let locString;
-  if (!coverageMode)
-    locString = "<" + n.loc.start.line + "," + n.loc.start.column + ">--<" + n.loc.end.line + "," + n.loc.end.column + ">";
-  else {
-    locString = "<" + n.body.loc.start.line + "," + n.body.loc.start.column + ">--<" + n.body.loc.end.line + "," + n.body.loc.end.column + ">";
-  }
+  // let  startCol=colNum2V8(n.loc.start.line,n.loc.start.column,filename,'start')
+  // let endCol =colNum2V8(n.body.loc.end.line,n.body.loc.end.column,filename,'end')
+  locString = "<" + n.body.loc.start.line + "," + n.body.loc.start.column + ">--<" + n.body.loc.end.line + "," + n.body.loc.end.column + ">";
+
 
   return buildHappyName(filename + ":" + locString);
 }
 
-function adjustLOC(locAsString) {
-  /* Fun(/opt/src/acorn/src/location.js:<12,12>--<18,1>) 
-     want
-     acorn/src/location.js:<12,11>--<18,1>
 
-     note the -1 on the first column
-  */
+function colNum2V8(ln, col, bdir, type) {
+  let endTag = {
+    "start": "{",
+    "end": "("
+  }
+  let liner = new readlines(bdir);
+  let lCount = 0;
+  let next;
+  let newCol = col;
+  while (next = liner.next()) {
+    lCount++;
+    if (lCount === ln) {
+      var line = next.toString("utf-8");
+      if (!line.substring(col).includes("=>")) {
+        while (line.charAt(newCol) !== endTag[type]) {
+          newCol++;
+          if (newCol > line.length) {
+            newCol = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return newCol;
 
-  /* get /opt/src/acorn/src/location.js:<12,12>--<18,1> */
-  let adjustedLOC = locAsString.substring(4, locAsString.length - 1);
-
-  /* trim up to package root (by removing /opt/src/) 
-     get acorn/src/location.js:<12,12>--<18,1> */
-  // adjustedLOC = adjustedLOC.substring("/opt/src/".length, adjustedLOC.length);
-
-  /* adjust column number
-     get acorn/src/location.js:<12,11>--<18,1> */
-  let firstIndex = adjustedLOC.indexOf(":<") + ":<".length;
-  let secondIndex = adjustedLOC.indexOf(">--<");
-  let firstRowCol = adjustedLOC.substring(firstIndex, secondIndex).split(',');
-  firstRowCol[1] = String(Number(firstRowCol[1]) - 1);
-  adjustedLOC = adjustedLOC.substring(0, firstIndex) + firstRowCol[0] + ',' + firstRowCol[1] +
-    adjustedLOC.substring(secondIndex);
-
-  return adjustedLOC;
 }
 // 从一个特定格式的调用图文件中提取目标信息
-function getTargetsFromACG(filepath) {
+function getTargetsFromACG(filepath, profpath, coverpath) {
+  let listFunc = []
+  // 静态结果
+  const static_result = path.join(__dirname, filepath)
+
+
   // 读取指定路径下的文件，并按行拆分为数组 unprocessedCG
-  let unprocessedCG = fs.readFileSync(filepath, 'utf-8').split('\n');
-
-  // unprocessedCG 输入格式
-  // "col0","col1"
-  // "Callee(/home/ellen/Documents/ONR_Debloating/stubbifier/playground/commander.js/index.js:<90,14>--<98,3>)","Fun(/home/ellen/Documents/ONR_Debloating/stubbifier/playground/commander.js/index.js:<90,14>--<98,3>)"
-  // "Callee(/home/ellen/Documents/ONR_Debloating/stubbifier/playground/commander.js/index.js:<90,14>--<98,3>)","Fun(/home/ellen/codeql_home/codeql/javascript/tools/data/externs/es/es3.js:<2244,27>--<2244,60>)"
-  /* 移除第一行的col0,col1 */
+  let unprocessedCG = fs.readFileSync(static_result, 'utf-8').split('\n');
+  /* 移除收尾括号 */
   unprocessedCG.shift();
+  unprocessedCG.pop();
 
-  let targets = unprocessedCG.map((line) => {
-    line = line.substring(1, line.length - 2);
-    let target = line.split('\",\"')[1];
-
-    if (!target || target.substr(0, 3) != 'Fun') {
-      return "";
-    }
-
-    return adjustLOC(target);
+  unprocessedCG = unprocessedCG.map(item => {
+    item = item.replace(/\s+/g, '')
+    return item
   })
 
-  let partialRet = targets.filter((line) => {
-    return line != "";
-  });
+  let visitedItem = new Set()
+  const data = JSON.parse(fs.readFileSync(path.join(__dirname, profpath), 'utf8'));
 
-  return partialRet;
+  // node_prof结果
+  let node_prof_global = data['system'].filter(item => !item.includes(':{')).concat(data['anon'])
+
+  // coverage结果
+  let cover_data = getTargetsFromCoverageReport(coverpath)
+
+  // 返回函数调用结果列表
+  let targets = []
+
+  // 函数的调用关系
+  listFunc = listFunc.concat(unprocessedCG.filter(item => {
+    item = item.trim(' ').trim('"')
+    if (item.includes('<1,0>--<1,0>')) {
+      visitedItem.add(item)
+      return true
+    }
+  }))
+
+
+  node_prof_global.forEach(item1 => {
+    let startRow = item1.split(':')[1]
+    let endRow = item1.split(':')[3]
+    let endCol = Number(item1.split(':')[4].split(')')[0]) - 1
+    let res = unprocessedCG.filter((item) => {
+      item = item.trim(' ').trim('"')
+      let pattern = /<(\d+),(\d+)>--<(\d+),(\d+)>/;
+      let matchRes = item.split('->')[0].match(pattern)
+      let sg_start_row = matchRes[1], sg_end_row = matchRes[3], sg_end_column = matchRes[4]
+      if (startRow == sg_start_row && endRow == sg_end_row && endCol == sg_end_column) {
+        visitedItem.add(item)
+        return true
+      }
+    })
+    listFunc = listFunc.concat(res)
+  })
+  listFunc.forEach(item => {
+    let target = item.split('->')[1]
+    findChildrenFunction(unprocessedCG, listFunc, target, visitedItem)
+
+  })
+
+  cover_data.forEach(item => {
+    findChildrenFunction(unprocessedCG, listFunc, item, visitedItem)
+  })
+  listFunc.forEach(line => {
+    let split_line = line.trim(' ').trim('"')
+    let [source, target] = split_line.split('->')
+    source = source.replace(/\"/g, '').replace(/\s/g, '')
+    target = target.replace(/\"/g, '').replace(/\s/g, '')
+    targets.push(source)
+    targets.push(target)
+  })
+
+
+  return targets;
 }
 
+function findChildrenFunction(allFunc, listFunc, parentId, visited) {
+  let res = allFunc.filter((item) => {
+    if (!visited.has(item)) {
+      parentId = parentId.replace(/\"/g, '').replace(/\s/g, '')
+      if (item.split('->')[0].includes(parentId)) {
+        visited.add(item)
+        return true
+      }
+    }
+  })
+  if (res.length == 0) return
+  else {
+    res.forEach(item => {
+      listFunc.push(item)
+      findChildrenFunction(allFunc, listFunc, item.split('->')[1], visited)
+    })
+  }
+}
 // 获取代码覆盖率报告中未覆盖的函数信息，并将其返回
 function getTargetsFromCoverageReport(filepath) {
   let uncoveredFunctions = getUncoveredFunctions(filepath);
@@ -105,16 +177,17 @@ function getUncoveredFunctions(pathToCoverageReport) {
   const calledFunctions = []; // 被调用列表
   const uncalledFunctions = []; // 未被调用函数列表
   Object.keys(coverage).forEach((fileName) => { //遍历覆盖率报告中的每个文件
+
     Object.keys(coverage[fileName].fnMap).forEach((key) => { // 遍历每个文件中的函数
       if (coverage[fileName].f[key] > 0) { // 根据覆盖率信息判断函数是否被调用
         const loc = coverage[fileName].fnMap[key].loc;
         calledFunctions.push(
-          `${fileName}:<${loc.start.line},${loc.start.column}>--<${loc.end.line},${loc.end.column}>`
+          `${path.relative(__dirname, fileName)}:<${loc.start.line},${loc.start.column}>--<${loc.end.line},${loc.end.column}>`
         )
       } else {
         const loc = coverage[fileName].fnMap[key].loc;
         uncalledFunctions.push(
-          `${fileName}:<${loc.start.line},${loc.start.column}>--<${loc.end.line},${loc.end.column}>`
+          `${path.relative(__dirname, fileName)}:<${loc.start.line},${loc.start.column}>--<${loc.end.line},${loc.end.column}>`
         )
       }
     });
@@ -217,18 +290,24 @@ function getNumLinesSpannedByNode(n) {
 
 
 
-const SKIP_DIR = ['.nyc_output', '.git', 'coverage', 'test', 'build', 'docs', '__test__', 'changelogs']
+const SKIP_DIR = ['.nyc_output', '.git', 'coverage', 'build', 'docs', 'changelogs']
 // 获取指定目录下的所有文件路径，并递归获取子目录中的文件路径
-function getAllFiles(dirname, recurse = true, listOfFiles = []) {
+function getAllFiles(dirname, recurse = true, listOfFiles = [], dept) {
   let baseListOfFiles = fs.readdirSync(dirname);
 
   for (let i = 0; i < baseListOfFiles.length; i++) {
-    if (fs.statSync(dirname + "/" + baseListOfFiles[i]).isDirectory() &&
+    if (fs.statSync(path.join(dirname, baseListOfFiles[i])).isDirectory() &&
       !SKIP_DIR.includes(baseListOfFiles[i]) &&
       recurse) {
-      // console.log( );
-      // SKIP_DIR.indexOf(baseListOfFiles[i]!=-1) &&
-      listOfFiles = getAllFiles(dirname + "/" + baseListOfFiles[i], recurse, listOfFiles);
+      let node_mod_index = dirname.split("\\").indexOf("node_modules")
+
+      if (node_mod_index > -1 && dept) {
+        if (dept.indexOf(curPath.split("\\")[node_mod_index + 1]) > -1) {
+          listOfFiles = getAllFiles(path.join(dirname, baseListOfFiles[i]), recurse, listOfFiles);
+        }
+      } else {
+        listOfFiles = getAllFiles(path.join(dirname, baseListOfFiles[i]), recurse, listOfFiles);
+      }
     }
     else {
       if (baseListOfFiles[i].endsWith('js') || baseListOfFiles[i].endsWith('ts')) {
@@ -237,7 +316,7 @@ function getAllFiles(dirname, recurse = true, listOfFiles = []) {
 
     }
   }
-  return listOfFiles;
+  return listOfFiles.filter(item => item != '');
 };
 // 确定是否应该对指定的文件进行stubbify操作
 function shouldStubbify(curPath, file, depList) {
@@ -249,13 +328,23 @@ function shouldStubbify(curPath, file, depList) {
       file.indexOf("node_modules") > -1);
   // 如果传入了依赖列表 depList，则检查文件是否在依赖列表中。如果文件位于 "node_modules" 目录下，确保其在依赖列表中
   if (depList) {
-    let node_mod_index = curPath.split("/").indexOf("node_modules");
+    let node_mod_index = curPath.split("\\").indexOf("node_modules");
     if (node_mod_index > -1) { // if it's a node_module and we have a dep list, need to make sure it's in the dep list 
-      shouldStub = shouldStub && (depList.indexOf(curPath.split("/")[node_mod_index + 1]) > -1);
+      shouldStub = shouldStub && (depList.indexOf(curPath.split("\\")[node_mod_index + 1]) > -1);
     }
   }
   return shouldStub;
 }
+
+
+
+function getFunctionCode(sourceCode,body){
+  var functionBodyLength = body.range[1] - body.range[0] - 2;
+  var startIndex = body.range[0] + 1;
+  var functionBody =sourceCode.slice(startIndex, startIndex + functionBodyLength);
+  return functionBody;
+}
+
 
 exports.buildHappyName = buildHappyName;
 exports.generateNodeUID = generateNodeUID;

@@ -1,0 +1,12 @@
+{
+  "reporter": [
+    "json", "text"
+  ],
+  "excludeNodeModules": false,
+  "all": true,
+  "include": [
+    "q.js",
+    "q.min.js",
+    "queue.js"
+  ]
+}

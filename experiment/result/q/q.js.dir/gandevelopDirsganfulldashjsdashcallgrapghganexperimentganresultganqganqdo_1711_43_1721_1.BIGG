@@ -1,0 +1,13 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1711_43_1721_1 = function () {
+  return this.then(function (promises) {
+    return all(array_map(promises, function (promise) {
+      promise = Q(promise);
+      function regardless() {
+        return promise.inspect();
+      }
+      return promise.then(regardless, regardless);
+    }));
+  });
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1711_43_1721_1;

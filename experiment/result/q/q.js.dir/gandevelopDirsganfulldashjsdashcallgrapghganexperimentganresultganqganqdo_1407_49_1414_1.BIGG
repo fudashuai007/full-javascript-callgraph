@@ -1,0 +1,10 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1407_49_1414_1 = function (op, args) {
+  var self = this;
+  var deferred = defer();
+  Q.nextTick(function () {
+    self.promiseDispatch(deferred.resolve, op, args);
+  });
+  return deferred.promise;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1407_49_1414_1;

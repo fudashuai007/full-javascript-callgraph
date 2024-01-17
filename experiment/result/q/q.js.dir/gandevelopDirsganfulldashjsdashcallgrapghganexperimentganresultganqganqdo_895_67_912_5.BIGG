@@ -1,0 +1,19 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_895_67_912_5 = function (value) {
+  var newValue;
+  var threw = false;
+  try {
+    newValue = _progressed(value);
+  } catch (e) {
+    threw = true;
+    if (Q.onerror) {
+      Q.onerror(e);
+    } else {
+      throw e;
+    }
+  }
+  if (!threw) {
+    deferred.notify(newValue);
+  }
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_895_67_912_5;

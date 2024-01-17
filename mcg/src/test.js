@@ -14,18 +14,9 @@
 // map.set('a',1)
 // map.set('a',2)
 // console.log(map);
-function add(n){
-  if(typeof n === 'function'){
-    return  function(target){
-      return 
-    }
-  }else {
-
-  }
-
-
-
-}
-
-
-console.log(add(1)(2)());
+let a = new Set()
+let b = [1,2,3]
+let c = [2,3,4]
+a.add()
+a.add([...c])
+console.log(a);

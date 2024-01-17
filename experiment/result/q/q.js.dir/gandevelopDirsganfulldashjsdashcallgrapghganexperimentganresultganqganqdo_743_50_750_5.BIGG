@@ -1,0 +1,10 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_743_50_750_5 = function (x, y) {
+  if (x === y) {
+    // TODO: "===" should be Object.is or equiv
+    return x;
+  } else {
+    throw new Error("Q can't join: not the same: " + x + " " + y);
+  }
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_743_50_750_5;

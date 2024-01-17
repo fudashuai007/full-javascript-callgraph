@@ -43,9 +43,7 @@ function get_fake_root(path) {
 }
 // extract a call graph from a flow graph by collecting all function vertices that are inversely reachable from a callee vertex
 function extractCG(ast, flow_graph) {
-
     var edges = new graph.Graph()
-    let callToFn = new Map()
     escaping = [], unknown = [];
 
     var reach = dftc.reachability(flow_graph);
@@ -53,9 +51,10 @@ function extractCG(ast, flow_graph) {
     /* fn is a flow graph node of type 'FuncVertex' */
     function processFuncVertex(fn) {
         var r = reach.getReachable(fn)
-
-        let addEdgeFlag = true, pathPatch = false, nativeCalled = false
-        let fnPaths = [], fnIndex, propData, fnProp
+        // addEdgeFlag = true, pathPatch = false,
+        let nativeCalled = false
+        // fnPaths = [],
+        let fnIndex, propData, fnProp
 
 
 
@@ -100,8 +99,14 @@ function extractCG(ast, flow_graph) {
                             continue
                         } else {
                             if (fnIndex == r[i].paramIndex) {
-                                edges.addEdge(r[i], fn);
-                                r[i].visited = true
+                                if (r[i].call.attr.enclosingFunction === undefined) {
+                                    if (r[i].call.type === 'CallExpression')
+                                        edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                    // edges.addEdge(fake_root, fn);
+                                } else {
+                                    edges.addEdge(r[i].call.attr.enclosingFunction.attr.func_vertex, fn);
+                                    r[i].visited = true
+                                }
 
                             } else {
                                 continue
@@ -109,17 +114,29 @@ function extractCG(ast, flow_graph) {
                         }
                     } else {
                         if (fnIndex != undefined) {
+                            // if (r[i].call.attr.enclosingFunction === undefined) {
+                            //     if (r[i].call.type === 'CallExpression')
+                            //         edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                            // edges.addEdge(fake_root, fn);
+                            // } else {
                             if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1 && fnProp && fnProp === r[i].mes) {
                                 edges.addEdge(nativeCalleeVertex(r[i]), fn);
                             }
+                            // }
 
                             continue
                         } else {
 
                             if (nativeCalled) {
                                 if (r[i].mes && fnProp === r[i].mes) {
+                                    // if (r[i].call.attr.enclosingFunction === undefined) {
+                                    // if (r[i].call.type === 'CallExpression')
+                                    // edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                    // edges.addEdge(fake_root, fn);
+                                    // } else {
                                     edges.addEdge(nativeCalleeVertex(r[i]), fn);
                                     continue
+                                    // }
                                 }
 
                             } else {
@@ -146,8 +163,17 @@ function extractCG(ast, flow_graph) {
                                 //     }
 
                                 // }
-                                edges.addEdge(r[i], fn);
-                                r[i].visited = true
+                                if (r[i].call.attr.enclosingFunction === undefined) {
+                                    if (r[i].call.type === 'CallExpression')
+                                        edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                    // edges.addEdge(fake_root, fn);
+                                } else {
+                                    if (!r[i].mes) {
+                                        edges.addEdge(r[i].call.attr.enclosingFunction.attr.func_vertex, fn);
+                                        r[i].visited = true
+                                    }
+
+                                }
                                 // if(!fn.visited){
 
                             }
@@ -166,8 +192,20 @@ function extractCG(ast, flow_graph) {
             for (let i = 0; i < r.length; i++) {
                 if (r[i].type === 'UnknownVertex')
                     escaping[escaping.length] = fn;
-                else if (r[i].type === 'CalleeVertex' && !r[i].visited) {
-                    edges.addEdge(r[i], fn);
+                else if (r[i].type === 'CalleeVertex') {
+                    fn['loc'] = r[i].call.loc
+                    fn['attr'] = r[i].call.attr
+                    if (r[i].call.attr.enclosingFunction === undefined) {
+                        if (r[i].call.type === 'CallExpression')
+                            edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                        // edges.addEdge(fake_root, fn);
+                    } else {
+                        edges.addEdge(r[i].call.attr.enclosingFunction.attr.func_vertex, fn);
+                        r[i].visited = true
+                    }
+
+
+                    // edges.addEdge(r[i], fn);
                 }
             }
         }

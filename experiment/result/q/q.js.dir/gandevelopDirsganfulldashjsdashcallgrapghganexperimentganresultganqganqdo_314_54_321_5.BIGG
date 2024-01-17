@@ -1,0 +1,10 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_314_54_321_5 = function (callback, thisp) {
+  var self = this;
+  var collect = [];
+  array_reduce(self, function (undefined, value, index) {
+    collect.push(callback.call(thisp, value, index, self));
+  }, void 0);
+  return collect;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_314_54_321_5;

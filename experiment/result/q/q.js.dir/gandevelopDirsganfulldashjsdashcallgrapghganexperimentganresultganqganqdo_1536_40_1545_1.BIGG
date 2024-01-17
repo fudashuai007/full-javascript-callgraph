@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1536_40_1545_1 = function (object /*...args*/) {
+  var promise = Q(object);
+  var args = array_slice(arguments, 1);
+  return function fbound() {
+    return promise.dispatch("apply", [this, args.concat(array_slice(arguments))]);
+  };
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1536_40_1545_1;

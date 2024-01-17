@@ -1,0 +1,22 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1222_24_1230_1 = function master(object) {
+  return Promise({
+    "isDef": function () {}
+  }, function fallback(op, args) {
+    return dispatch(object, op, args);
+  }, function () {
+    return Q(object).inspect();
+  });
+}
+
+/**
+ * Spreads the values of a promised array of arguments into the
+ * fulfillment callback.
+ * @param fulfilled callback that receives variadic arguments from the
+ * promised array
+ * @param rejected callback that receives the exception if the promise
+ * is rejected.
+ * @returns a promise for the return value or thrown exception of
+ * either callback.
+ */; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1222_24_1230_1;

@@ -1,0 +1,9 @@
+[
+  "mcg/src/test/Data/node-jsonfile/index.js:<40:39,61:1> -> mcg/src/test/Data/node-jsonfile/utils.js:<8:28,12:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js:<73:45,79:1> -> mcg/src/test/Data/node-jsonfile/utils.js:<1:25,6:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js:<63:48,69:1> -> mcg/src/test/Data/node-jsonfile/utils.js:<1:25,6:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js:<63:48,69:1> -> mcg/src/test/Data/node-jsonfile/node_modules/universalify/index.js:<3:37,13:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js:<10:42,36:1> -> mcg/src/test/Data/node-jsonfile/utils.js:<8:28,12:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js:<10:42,36:1> -> mcg/src/test/Data/node-jsonfile/node_modules/universalify/index.js:<3:37,13:1>",
+  "mcg/src/test/Data/node-jsonfile/index.js<1:0,1:0> -> mcg/src/test/Data/node-jsonfile/node_modules/universalify/index.js:<15:36,24:1>"
+]

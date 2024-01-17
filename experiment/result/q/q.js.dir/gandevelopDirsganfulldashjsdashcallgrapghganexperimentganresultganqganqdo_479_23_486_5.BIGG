@@ -1,0 +1,8 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_479_23_486_5 = function () {
+  if (typeof console !== "undefined" && typeof console.warn === "function") {
+    console.warn(name + " is deprecated, use " + alternative + " instead.", new Error("").stack);
+  }
+  return callback.apply(callback, arguments);
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_479_23_486_5;

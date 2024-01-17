@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1202_27_1208_5 = function () {
+  try {
+    promise.then(deferred.resolve, deferred.reject, deferred.notify);
+  } catch (exception) {
+    deferred.reject(exception);
+  }
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1202_27_1208_5;

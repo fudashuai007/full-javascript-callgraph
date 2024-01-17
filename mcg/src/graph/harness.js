@@ -1,6 +1,6 @@
 
 // maps canonical name of native function to the property it is stored in
-module.exports.nativeFlows1 = {
+module.exports.nativeFlows = {
     "eval": "eval",
     "parseInt": "parseInt",
     "parseFloat": "parseFloat",
@@ -1557,8 +1557,10 @@ module.exports.nativeFlows2 = {
     "Node_prototype_detachEvent": "detachEvent",
     "Node_prototype_doScroll": "doScroll"
 }
-module.exports.nativeFlows = {
-    "Array_prototype_replace": "replace",
+module.exports.nativeFlows1 = {
+    "Array_prototype_sort": "sort",
+    "Array_prototype_map": "map",
+    "Object_keys": "keys",
 };
 
 

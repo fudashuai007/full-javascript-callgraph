@@ -1,0 +1,12 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_576_34_585_5 = function () {
+  if (messages) {
+    return promise;
+  }
+  var nearerValue = nearer(resolvedPromise);
+  if (isPromise(nearerValue)) {
+    resolvedPromise = nearerValue; // shorten chain
+  }
+  return nearerValue;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_576_34_585_5;

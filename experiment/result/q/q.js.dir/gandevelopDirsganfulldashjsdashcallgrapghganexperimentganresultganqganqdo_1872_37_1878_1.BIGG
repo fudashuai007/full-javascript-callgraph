@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1872_37_1878_1 = function (object, timeout) {
+  if (timeout === void 0) {
+    timeout = object;
+    object = void 0;
+  }
+  return Q(object).delay(timeout);
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1872_37_1878_1;

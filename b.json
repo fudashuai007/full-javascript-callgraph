@@ -1,4 +1,6 @@
 [
-  "mcg\\src\\test\\exper\\test1.js:18:0 -> mcg\\src\\test\\exper\\test1.js:11:4",
-  "mcg\\src\\test\\exper\\test1.js:18:0 -> mcg\\src\\test\\exper\\test1.js:15:4"
+  "mcg/src/test/exper/index.js(Native):<1,0:1,0> -> mcg/src/test/exper/index.js:<36:29,37:1>",
+  "mcg/src/test/exper/index.js(Native):<1,0:1,0> -> mcg/src/test/exper/index.js:<12:25,13:1>",
+  "mcg/src/test/exper/index.js(Native):<1,0:1,0> -> mcg/src/test/exper/index.js:<28:29,29:1>",
+  "mcg/src/test/exper/index.js(Native):<1,0:1,0> -> mcg/src/test/exper/index.js:<20:28,21:1>"
 ]

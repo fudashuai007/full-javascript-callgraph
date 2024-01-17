@@ -28,6 +28,8 @@ function shouldTransformBundlerMode(fctNode) {
 // or, if the function name is in the list
 // TODO deal with scoping
 function shouldTransformFunction(fctName, reachableFuns, uncoveredMode, fctNode) {
+    let [path,info]=fctName.split('do_')
+    fctName=path+'do_'+info.split('_')[0]+'_'+info.split('_')[2]
     var fctNotInList = reachableFuns.indexOf(fctName) == -1;
     if (fctNode.body.type == "BlockStatement") {
         fctNotInList = fctNotInList &&
@@ -145,6 +147,7 @@ function processAST(
 }
 // 为具名函数添加动态加载
 function generateNewFunctionWithID(scopedFctName, fctID, isArrowFunction = false) {
+    scopedFctName=scopedFctName.split(':')[1].replace(/\\/g,'gan')
     let argsName = isArrowFunction ? "args_uniqID" : "arguments";
     let newFunctionBodyString = `let toExec = eval(stubs.getCode("${scopedFctName}"));
                                            toExec = stubs.copyFunctionProperties(${fctID}, toExec);
@@ -159,6 +162,7 @@ function generateNewFunctionWithID(scopedFctName, fctID, isArrowFunction = false
 // 为匿名函数添加动态加载
 function generateNewFunctionNoID(scopedFctName, isArrowFunction) {
     // 先从缓存中读取，缓存未命中，则再动态加载
+    scopedFctName=scopedFctName.split(':')[1].replace(/\\/g,'gan')
     let argsName = isArrowFunction ? "args_uniqID" : "arguments";
     let newFunctionBodyString = `let fctID = "${scopedFctName}";
                                            let toExecString = stubs.getStub(fctID);
@@ -179,6 +183,7 @@ function generateNewFunctionNoID(scopedFctName, isArrowFunction) {
 // for class methods, we can redefine them from inside themselves
 // but the format is different from nonclass methods: we need to use this.__proto__.ID
 function generateNewClassMethodWithID(scopedFctName, fctID, kind, isArrowFunction) {
+    scopedFctName=scopedFctName.split(':')[1].replace(/\\/g,'gan')
     let argsName = isArrowFunction ? "args_uniqID" : "arguments";
     let fctDefString = `this.${fctID} = toExec;`; // default callExpression
     let fctLookupString = `this.${fctID}`;
@@ -203,6 +208,7 @@ function generateNewClassMethodWithID(scopedFctName, fctID, kind, isArrowFunctio
         }).program.body);
 }
 function generateNewClassMethodNoID(scopedFctName, key, isArrowFunction = false) {
+    scopedFctName=scopedFctName.split(':')[1].replace(/\\/g,'gan')
     let argsName = isArrowFunction ? "args_uniqID" : "arguments";
     let newFunctionBodyString = `let fctID = "${scopedFctName}";
                                            let toExecString = stubs.getStub(fctID);
@@ -285,46 +291,18 @@ function stubFunction(
     // then, write out all the functions to be stubbified 
     // forEach for a map iterates over: value, key
     functionsToStub.forEach(function (fctBody, fctName, map) {
+        fctName=fctName.split(':')[1].replace(/\\/g,'gan')
         if (bundleMode) {
             fctBody = fctBody.split('eval("STUB_FLAG_STUB_THIS_STUB_FCT");').join("\n");
         }
-        var stubFileBody = "let " + fctName + " = " + fctBody + "; \n\n" + fctName + ";";
+        var stubFileBody = "let " + fctName + " = " + fctBody+ "; \n\n" + fctName + ";";
         // TODO: currently in safeEvalMode we check to see if console.log is eval
-        if (testingMode) {
-            console.log(`[STUBBIFIER METRICS] function stubbed: ${fctName} --- ${filename}`);
-            stubFileBody = `console.log("[STUBBIFIER METRICS] EXPANDED STUB HAS BEEN CALLED: ${fctName} --- ${filename}");` + stubFileBody;
-        }
-        if (safeEvalMode) {
-            stubFileBody = "let dangerousFunctions = [eval]; if( process){dangerousFunctions += [process.exec]};\n" + stubFileBody;
-        }
-        /* debug */
-        // let fileSpecAST = parse(stubFileBody, {sourceType: "unambiguous", plugins: [ "classProperties"]}).program;
-        var fileSpecAST = {};
-        try {
-            fileSpecAST = parser.parse(stubFileBody, { allowSuperOutsideMethod: true, sourceType: "unambiguous", plugins: ["classProperties"] }).program;
-        }
-        catch (e) {
-            console.error("Big oof bro... error parsing following snippet. Error: " + e);
-            console.error(stubFileBody);
-            process.exit(0);
-        }
-        fileSpecAST = core.transformFromAstSync(fileSpecAST, null, {
-            ast: true, plugins: [function addTests() {
-                return {
-                    visitor: {
-                        CallExpression: function (path) {
-                            if (safeEvalMode && !path.node.isNewCallExp && !(path.node.callee.type == "Super")) {
-                                var inAsyncFunction = path.findParent(function (path) { return path.isFunction() && path.node.async; });
-                                var newWrapperCall = buildEvalCheck(path.node, inAsyncFunction, filename);
-                                newWrapperCall.isNewCallExp = true;
-                                path.replaceWith(newWrapperCall);
-                            }
-                        },
-                    }
-                };
-            }]
-        }).ast;
-        fs.writeFileSync(filename + ".dir/" + fctName + ".BIGG", generate(fileSpecAST).code);
+        // if (testingMode) {
+        //     console.log(`[STUBBIFIER METRICS] function stubbed: ${fctName} --- ${filename}`);
+        //     stubFileBody = `console.log("[STUBBIFIER METRICS] EXPANDED STUB HAS BEEN CALLED: ${fctName} --- ${filename}");` + stubFileBody;
+        // }
+
+        fs.writeFileSync(filename +".dir/" + fctName +".BIGG", stubFileBody);
         // console.log(fctBody);
     });
     // Now that the directory is written, zip it up (if we want to).

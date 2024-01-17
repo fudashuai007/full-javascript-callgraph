@@ -1,0 +1,12 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_742_41_751_1 = function (that) {
+  return Q([this, that]).spread(function (x, y) {
+    if (x === y) {
+      // TODO: "===" should be Object.is or equiv
+      return x;
+    } else {
+      throw new Error("Q can't join: not the same: " + x + " " + y);
+    }
+  });
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_742_41_751_1;

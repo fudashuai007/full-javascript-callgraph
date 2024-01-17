@@ -1,0 +1,11 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_302_48_310_5 = function (value) {
+  // not a very good shim, but good enough for our one use of it
+  for (var i = 0; i < this.length; i++) {
+    if (this[i] === value) {
+      return i;
+    }
+  }
+  return -1;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_302_48_310_5;

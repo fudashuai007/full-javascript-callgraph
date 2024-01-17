@@ -1,0 +1,15 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1942_46_1954_1 = function (callback /*...args*/) {
+  if (callback === undefined) {
+    throw new Error("Q can't wrap an undefined function");
+  }
+  var baseArgs = array_slice(arguments, 1);
+  return function () {
+    var nodeArgs = baseArgs.concat(array_slice(arguments));
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    Q(callback).fapply(nodeArgs).fail(deferred.reject);
+    return deferred.promise;
+  };
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1942_46_1954_1;

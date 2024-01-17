@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_2018_48_2024_1 = function (object, name /*...args*/) {
+  var nodeArgs = array_slice(arguments, 2);
+  var deferred = defer();
+  nodeArgs.push(deferred.makeNodeResolver());
+  Q(object).dispatch("post", [name, nodeArgs]).fail(deferred.reject);
+  return deferred.promise;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_2018_48_2024_1;

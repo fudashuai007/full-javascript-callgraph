@@ -41,6 +41,9 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                         flow_graph.addEdge(vertexFor(nd.attr.callee), calleeVertex(nd))
                         // flow_graph.addEdge(vertexFor(nd.callee.object), argVertex(nd, 0));
                     }
+                    // if (!flow_graph.hasEdge(vertexFor(nd.callee), calleeVertex(nd))) {
+                    //     flow_graph.addEdge(vertexFor(nd.callee), calleeVertex(nd));
+                    // }
                 }
 
             // R8 FALL THROUGH
@@ -221,7 +224,7 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
                     flow_graph.addEdge(funcVertex(nd.value), propVertex(nd.key))
                 break;
 
-            // case 'BinaryExpression':
+            // case ' ':
 
             //     flow_graph.addEdge(vertexFor(nd.left), vertexFor(nd));
             //     flow_graph.addEdge(vertexFor(nd.right), vertexFor(nd));
@@ -239,7 +242,15 @@ function addIntraproceduralFlowGraphEdges(ast, flow_graph) {
 function vertexFor(nd, data) {
     if (!nd) return unknownVertex()
     var decl, body;
+
     switch (nd.type) {
+
+        case 'ParenthesizedExpression':
+            if (nd['expression'] && nd['expression'].type == 'FunctionExpression') {
+                return globVertex(nd['expression'].id)
+            }
+            break;
+
         case 'Identifier':
             // global variables use a global vertex, local variables a var vertex
             // console.log(nd.attr.scope);
@@ -272,7 +283,10 @@ function vertexFor(nd, data) {
 // variable vertices are cached at the variable declarations
 function varVertex(nd) {
     if (!nd) return
-
+    if (nd.type === 'AssignmentPattern')
+        nd = nd.left;
+    if (nd.type === 'RestElement')
+        nd = nd.argument;
     if (nd && nd.type !== 'Identifier' && nd.type !== 'PrivateName')
         throw new Error("invalid variable vertex");
 
@@ -489,6 +503,7 @@ function calleeVertex(nd, data) {
 
     if (data != undefined) {
         if (('' + data).indexOf('>--<') != -1) {
+            resultVertex['loc']=nd.loc
             resultVertex['mes'] = nd.attr.enclosingFile + '<' + nd.loc.start.line + ',' + nd.loc.start.column + '>--<' + nd.loc.end.line + ',' + nd.loc.end.column + '>'
         } else {
             resultVertex['paramIndex'] = data

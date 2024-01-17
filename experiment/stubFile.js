@@ -168,7 +168,7 @@ function stubFile(filename, safeEvalMode = false, testingMode = false, zipFiles 
   let ast;
   let esmMode;
   try {
-    ast = parse(code, { sourceType: "unambiguous", plugins: ["classProperties", "typescript"] }).program;
+    ast = parser.parse(code, { sourceType: "unambiguous", plugins: ["classProperties", "typescript"] }).program;
     esmMode = ast.sourceType == "module";
   } catch (e) {
     console.error("Yikes... parsing error in " + filename + ":  " + e);
@@ -228,7 +228,7 @@ function stubFile(filename, safeEvalMode = false, testingMode = false, zipFiles 
     evalExports += "}; evalRetVal;";
   }
 
-  let outputAST = parse(requires + body + exportVars, { sourceType: "unambiguous" }).program;
+  let outputAST =parser.parse(requires + body + exportVars, { sourceType: "unambiguous" }).program;
   if (esmMode) {
     // add import statements to the start of the stub, and exports to the end
     outputAST = transformFromAstSync(outputAST, null, {
@@ -261,7 +261,7 @@ function stubFile(filename, safeEvalMode = false, testingMode = false, zipFiles 
           return {
             visitor: {
               Program(path) {
-                path.node.body = path.node.body.concat(parse(evalExports, { sourceType: "unambiguous" }).program.body);
+                path.node.body = path.node.body.concat(parser.parse(evalExports, { sourceType: "unambiguous" }).program.body);
                 path.skip();
               }
             }

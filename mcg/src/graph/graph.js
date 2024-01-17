@@ -81,12 +81,16 @@ class BasicGraph {
 }
 
 function nodeToString(nd) {
-    try{
-        return nd.attr.pp();
-    }catch(e){
+    try {
+        if (nd.type == 'NativeVertex') {
+            return nd.name
+        } else {
+            return nd.attr.pp();
+        }
+    } catch (e) {
         console.log(nd);
-    } 
-   
+    }
+
 }
 
 var cf = nodeToString;
@@ -108,7 +112,7 @@ Graph.prototype.addNode = function (nd) {
 }
 
 Graph.prototype.addEdge = function (from, to, annote) {
-   
+
     this.addNode(from);
     this.addNode(to);
     const cnameFrom = cf(from)

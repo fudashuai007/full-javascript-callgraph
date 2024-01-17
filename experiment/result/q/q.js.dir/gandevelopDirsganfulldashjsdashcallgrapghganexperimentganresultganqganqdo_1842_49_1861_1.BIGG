@@ -1,0 +1,20 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1842_49_1861_1 = function (ms, error) {
+  var deferred = defer();
+  var timeoutId = setTimeout(function () {
+    if (!error || "string" === typeof error) {
+      error = new Error(error || "Timed out after " + ms + " ms");
+      error.code = "ETIMEDOUT";
+    }
+    deferred.reject(error);
+  }, ms);
+  this.then(function (value) {
+    clearTimeout(timeoutId);
+    deferred.resolve(value);
+  }, function (exception) {
+    clearTimeout(timeoutId);
+    deferred.reject(exception);
+  }, deferred.notify);
+  return deferred.promise;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1842_49_1861_1;

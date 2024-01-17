@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1844_43_1850_5 = function () {
+  if (!error || "string" === typeof error) {
+    error = new Error(error || "Timed out after " + ms + " ms");
+    error.code = "ETIMEDOUT";
+  }
+  deferred.reject(error);
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1844_43_1850_5;

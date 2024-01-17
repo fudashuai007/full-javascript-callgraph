@@ -9,7 +9,9 @@ class Stubbifier {
         this.testingMode = testingMode;
     }
 
-    copyFunctionProperties (source, dest) {
+
+
+    copyFunctionProperties(source, dest) {
         // copy the associated properties
         try {
             if (!source || source === null) {
@@ -34,6 +36,16 @@ class Stubbifier {
         return this.stubMap.get(functionName);
     }
 
+    getGenerateInfo(scopedFctName) {
+        return `stubs.getCode("${scopedFctName}");`
+
+    }
+
+    getGenerateInfoWithNoID(scopedFctName) {
+        return `stubs.getCode("${scopedFctName}");`
+
+    }
+
     setStub(functionName, evaledFunString) {
         this.stubMap.set(functionName, evaledFunString);
     }
@@ -46,7 +58,7 @@ class Stubbifier {
                 cwd: path.dirname(this.filePath)
             }); // , [this.filePath + '.dir' + '.tgz']);
         }
-        if( this.testingMode) {
+        if (this.testingMode) {
             console.log("[STUBBIFIER METRICS] FUNCTION STUB HAS BEEN EXPANDED: " + searchName + " --- " + this.filePath);
         }
         var filename = this.filePath + ".dir/" + searchName + ".BIGG";

@@ -6,6 +6,7 @@ const astVisitor = require('./graph/astVisitor')
 const binding = require('./graph/binding')
 const pessimistic = require('./graph/pessimistic')
 const fs = require('fs')
+const path = require('path')
 const JSONStream = require('JSONStream');
 //
 const options = {
@@ -14,10 +15,14 @@ const options = {
   // analysisDir: 'src/test/Data/passport/lib',
   // analysisDir: 'src/test/Data/request/lib',
   // analysisDir: 'src/test/Data/jshint/src',
-  // analysisDir: 'src/test/exper',
+  // analysisDir: 'mcg/src/test/exper',
   // analysisDir: 'src/test/Data/debug/src',
   // analysisDir: 'src/result/memfs/src',
-  analysisDir: 'mcg/src/test/exper',
+  // analysisDir: 'mcg/src/test/Data/body-parser/analysis_dir/static',
+  analysisDir: 'mcg/src/test/Data/memory-fs',
+  // analysisDir: 'mcg/src/test/Data/compression',
+  // analysisDir: 'mcg/src/test/Data/compression/node_modules/accepts',
+  // analysisDir: 'mcg/src/test/Data/body-parser/analysis_dir/static/debug',
   output: ['a.json', 'b.json'],
   style: 'v8',
   time: true,
@@ -45,15 +50,6 @@ function addNode(edge, v) {
     edge.end = { row: v.loc.end.line, column: v.loc.end.column };
     edge.range = { start: nd.call.range[0], end: nd.call.range[1] };
     return edge;
-    // let nd = v.call;
-    // edge.label = astVisitor.funcname(v.call.func)
-    // // edge.label = 'nativeCall(' + nd.attr.path.split(' ')[nd.attr.path.split(' ').length - 1] + ')';
-    // edge.file = nd.func.attr.enclosingFile;
-    // edge.path = nd.attr.path;
-    // edge.start = { row: nd.func.loc.start.line, column: nd.func.loc.start.column };
-    // edge.end = { row: nd.func.loc.end.line, column: nd.func.loc.end.column };
-    // edge.range = { start: nd.func.range[0], end: nd.func.range[1] };
-    // return edge;
   }
   if (v.type === 'CalleeVertex') {
     let nd = v.call;
@@ -79,10 +75,10 @@ function addNode(edge, v) {
     //'Math_log' (Native)
     edge.label = v.name;
     edge.file = "Native";
-    edge.start.row = null;
-    edge.end.row = null;
-    edge.start.column = null;
-    edge.end.column = null;
+    edge.start.row = v.loc.start.row;
+    edge.end.row = v.loc.end.column;
+    edge.start.column = v.loc.start.column;
+    edge.end.column = v.loc.end.column;
     edge.range = { start: null, end: null };
     return edge;
   }
@@ -90,8 +86,6 @@ function addNode(edge, v) {
 };
 
 function buildBinding(call, fn) {
-  // console.log(call);
-  // console.log(attr);
   let edge = {
     source: {
       label: null,
@@ -112,26 +106,45 @@ function buildBinding(call, fn) {
   addNode(edge.target, fn);
   return edge;
 };
+function pp123(v, baseDirToCut, v8Style) {
 
+  if (v.fake) return v.func.attr.enclosingFile.replace(/\\/g, "/") + ':<' + v.func.loc.start.line + ':' + v.func.loc.start.column + ',' + v.func.loc.end.line + ':' + v.func.loc.end.column + '>'
+  if (v.type === 'CalleeVertex')
+    return astVisitor.ppPos2(v.call, baseDirToCut, v8Style);
+  if (v.type === 'FuncVertex')
+    return astVisitor.ppPos2(v.func, baseDirToCut, v8Style);
+  if (v.type === 'NativeVertex')
+    return astVisitor.ppPos2(v, baseDirToCut, v8Style, 'nativeFunc');
+  // return v.name + '<' + v.loc.start.line + ':' + v.loc.start.column + ',' + v.loc.end.line + ':' + v.loc.end.column + '>';
+  if (v.type === 'NativeCalleeVertex')
+    return astVisitor.ppPos2(v, baseDirToCut, v8Style, 'nativeCallee');
+  throw new Error("strange vertex: " + v);
+}
 
 function pp(v, baseDirToCut, v8Style) {
+
+  if (v.fake) return v.func.attr.enclosingFile.replace(/\\/g, "/") + ':<' + v.func.loc.start.line + ',' + v.func.loc.start.column + '>--<' + v.func.loc.end.line + ',' + v.func.loc.end.column + '>'
   if (v.type === 'CalleeVertex')
-    // return astVisitor.ppPos(v.call);
-    return astVisitor.ppPos(v.call, baseDirToCut, v8Style);
+    return astVisitor.ppPos2(v.call, baseDirToCut, v8Style);
   if (v.type === 'FuncVertex')
-    // return astVisitor.ppPos(v.func);
-    return astVisitor.ppPos(v.func, baseDirToCut, v8Style);
+    return astVisitor.ppPos2(v.func, baseDirToCut, v8Style);
   if (v.type === 'NativeVertex')
-    return v.name;
+    return astVisitor.ppPos2(v, baseDirToCut, v8Style, 'nativeFunc');
+  // return v.name + '<' + v.loc.start.line + ':' + v.loc.start.column + ',' + v.loc.end.line + ':' + v.loc.end.column + '>';
   if (v.type === 'NativeCalleeVertex')
-    return astVisitor.ppPos(v, baseDirToCut, v8Style, 'native');
+    return astVisitor.ppPos2(v, baseDirToCut, v8Style, 'nativeCallee');
   throw new Error("strange vertex: " + v);
 }
 
 function main() {
-  for (const opt of Object.getOwnPropertyNames(program.opts())) {
-    options[opt] = program.opts()[opt]
-  }
+  // console.log(process.argv0);
+  options.analysisDir = process.argv[2]
+  options.output = [].concat(process.argv[3])
+
+
+  // for (const opt of Object.getOwnPropertyNames(program.opts())) {
+  //   options[opt] = program.opts()[opt]
+  // }
 
   if (!options.analysisDir) {
     throw Error('you should input analysis directory or file')
@@ -154,53 +167,54 @@ function main() {
     binding.addBindings(fileAst);
   }
   console.timeEnd("bindings ");
+  let entry_file
+  try{
+    const packageJson = JSON.parse(fs.readFileSync(path.join(options.analysisDir,'package.json'), 'utf8'));  
+    entry_file = packageJson.main;
+  }catch{
+    entry_file='index.js'
+  }
 
-
-  var forest = astVisitor.mergeAst(ast)
+  var forest = astVisitor.mergeAst(ast, options.analysisDir,entry_file)
   let cgs = []
   console.time("callgraph ");
   for (let tree of forest) {
-    // console.log(tree);
+    let tree_kids = tree.kids
+
+    // if(visitedForests.has(tree.name))
     cgs.push(pessimistic.buildCallGraph(tree))
   }
-  // cg = pessimistic.buildCallGraph(ast)
-
   console.timeEnd("callgraph ");
 
-  let result = [];
-  let styleResult = []
+  // let result = [];
+  let styleResult = new Set()
   for (let i = 0; i < cgs.length; i++) {
     cgs[i].edges.iter(function (call, fn) {
-      let edge = buildBinding(call, fn)
-
-      // styleResult.push(pp(call,options.analysisDir,options.v8) + " -> " + pp(fn,options.analysisDir,options.v8))
-      // if (options.od) {
-      //   styleResult.push(pp(call, options.od, options.v8) + " -> " + pp(fn, options.od, options.v8))
-      //   // console.log();
-      // }
-      if (!(edge.source.file == 'Native' || edge.target.file == 'Native')) {
-        styleResult.push(
-          edge.source.file + ':' + edge.source.start.row + ':' + edge.source.start.column
-          + " -> " +
-          edge.target.file + ':' + edge.target.start.row + ':' + edge.target.start.column)
-      }
-      result.push(edge);
+      // let edge = buildBinding(call, fn)
+      let start = pp(call, options.analysisDir, options.v8)
+      let end = pp(fn, options.analysisDir, options.v8)
+      if (start.split(':<')[1] != end.split(':<')[1])
+        if (end.includes('Native') && start.includes('1:0,1:0') || !end.includes('Native'))
+          styleResult.add(start + " -> " + end)
     });
   }
-
-
-  console.log(result);
-  // result = result.filter(item => item.source.label != item.target.label)
-  // console.log(styleResult);
-
-
   if (options.output !== null) {
     let filename = options.output[0];
-    let filename2 = options.output[1]
-    if (!filename.endsWith(".json")) {
-      filename += ".json";
-    }
-    fs.writeFile(filename, JSON.stringify(result, null, 2), function (err) {
+    // let filename2 = options.output[1]
+    // if (!filename.endsWith(".json")) {
+    //   filename += ".json";
+    // }
+    // fs.writeFile(filename, JSON.stringify(result, null, 2), function (err) {
+    //   if (err) {
+    //     let transformStream = JSONStream.stringify();
+    //     let outputStream = fs.createWriteStream(filename);
+    //     transformStream.pipe(outputStream);
+    //     result.forEach(transformStream.write);
+    //     transformStream.end();
+    //   }
+    // });
+
+    fs.writeFile(filename, JSON.stringify([...styleResult], null, 2), function (err) {
       if (err) {
         /*
         When happened something wrong (usually out of memory when we want print
@@ -209,26 +223,12 @@ function main() {
         let transformStream = JSONStream.stringify();
         let outputStream = fs.createWriteStream(filename);
         transformStream.pipe(outputStream);
-        result.forEach(transformStream.write);
-        transformStream.end();
-      }
-    });
-
-    fs.writeFile(filename2, JSON.stringify(styleResult, null, 2), function (err) {
-      if (err) {
-        /*
-        When happened something wrong (usually out of memory when we want print
-        the result into a file), then we try to file with JSONStream.
-         */
-        let transformStream = JSONStream.stringify();
-        let outputStream = fs.createWriteStream(filename2);
-        transformStream.pipe(outputStream);
         styleResult.forEach(transformStream.write);
         transformStream.end();
       }
     });
 
   }
-  return result;
+
 
 }

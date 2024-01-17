@@ -98,29 +98,29 @@ function extractCG(ast, flow_graph) {
                                 continue
                             } else {
                                 if (fnIndex == r[i].paramIndex) {
-                                    // if (r[i].call.attr.enclosingFunction === undefined) {
-                                    //     if (r[i].call.type === 'CallExpression')
-                                    //         edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                    //     // edges.addEdge(fake_root, fn);
-                                    // } else {
-                                        edges.addEdge(r[i], fn);
+                                    if (r[i].call.attr.enclosingFunction === undefined) {
+                                        if (r[i].call.type === 'CallExpression')
+                                            edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                        // edges.addEdge(fake_root, fn);
+                                    } else {
+                                        edges.addEdge(r[i].call.attr.enclosingFile, fn);
                                         r[i].visited = true
-                                    // }
+                                    }
                                 } else {
                                     continue
                                 }
                             }
                         } else {
                             if (fnIndex != undefined) {
-                                // if (r[i].call.attr.enclosingFunction === undefined) {
-                                //     if (r[i].call.type === 'CallExpression')
-                                //         edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                //     // edges.addEdge(fake_root, fn);
-                                // } else {
+                                if (r[i].call.attr.enclosingFunction === undefined) {
+                                    if (r[i].call.type === 'CallExpression')
+                                        edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                    // edges.addEdge(fake_root, fn);
+                                } else {
                                     if (tool.nativeCalls().indexOf(callPath[callPath.length - 1]) != -1 && fnProp && fnProp === r[i].mes) {
-                                        edges.addEdge(nativeCalleeVertex(r[i], fn));
+                                        edges.addEdge(nativeCalleeVertex(r[i].call.attr.enclosingFile, fn));
                                     }
-                                // }
+                                }
                                 continue
                             } else {
                                 // 优先去做路径匹配，路径匹配失效，再去直接匹配字符
@@ -136,31 +136,26 @@ function extractCG(ast, flow_graph) {
                                 // }
                                 // if(!fn.visited){
                                 if (nativeCalled) {
-                                    // 
-                                    // console.log(fnProp);
-                                    // console.log(r[i].mes);
-                                    // console.log(fnProp == r[i].mes);
-                                    // console.log(fnProp === r[i].mes);
                                     if (r[i].mes && fnProp === r[i].mes) {
-                                        // if (r[i].call.attr.enclosingFunction === undefined) {
-                                        //     if (r[i].call.type === 'CallExpression')
-                                        //         edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                        //     // edges.addEdge(fake_root, fn);
-                                        // } else {
-                                            edges.addEdge(nativeCalleeVertex(r[i], fn));
+                                        if (r[i].call.attr.enclosingFunction === undefined) {
+                                            if (r[i].call.type === 'CallExpression')
+                                                edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                            // edges.addEdge(fake_root, fn);
+                                        } else {
+                                            edges.addEdge(nativeCalleeVertex(r[i].call.attr.enclosingFile, fn));
                                             continue
-                                        // }
+                                        }
                                     }
 
                                 } else {
-                                    // if (r[i].call.attr.enclosingFunction === undefined) {
-                                    //     if (r[i].call.type === 'CallExpression')
-                                    //         edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
-                                    //     // edges.addEdge(fake_root, fn);
-                                    // } else {
+                                    if (r[i].call.attr.enclosingFunction === undefined) {
+                                        if (r[i].call.type === 'CallExpression')
+                                            edges.addEdge(get_fake_root(r[i].call.attr.enclosingFile), fn);
+                                        // edges.addEdge(fake_root, fn);
+                                    } else {
                                         edges.addEdge(r[i], fn);
                                         r[i].visited = true
-                                    // }
+                                    }
                                 }
 
                                 // }

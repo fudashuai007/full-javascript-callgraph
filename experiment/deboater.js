@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { stubFunction } = require("./stubFunction.js");
 const { flagFunctionForStubbing } = require("./functionFlagging.js");
-const stubFile = require("./stubFile.js");
+const { stubFile } = require("./stubFile.js");
 const { getTargetsFromCoverageReport,
   getTargetsFromACG,
   buildHappyName,
@@ -40,44 +40,54 @@ let bundleOptions = {
 let testingMode = true;
 let safeEvalMode = false;
 let recurseThroughDirs = true;
-let pro_dir = 'body-parser'
-let cur_dir = 'result/body-parser';
+let pro_dir = 'q'
+let cur_dir = 'result/q';
 // console.log('Reading ' + filename);
 
-let callgraphpath = false;
+let callgraphpath = path.join(cur_dir, 'static.csv');
+let node_profpath = path.join(cur_dir, 'node_prof.json')
 let coverageReportPath = path.join(cur_dir, 'coverage/coverage-final.json');
 let removeFunsPath = null;
 let functions = [];
-let listedFiles = [];
+let listedFiles = new Set()
 let removeFuns = [];
 let noCG = true;
 let uncoveredMode = true;
 let depList;
 
-// 静态分析
-if (callgraphpath) {
-  let targets = getTargetsFromACG(callgraphpath);
-  functions = targets.map(buildHappyName);
-  listedFiles = targets.map(item => path.join(__dirname, getFileName(item)));
-  noCG = false;
+// 合并动态分析与静态分析结果
+let targets = []
+
+let analysis_mode = 'stubifier'
+if (analysis_mode == 'static') { }
+else if (analysis_mode == 'dynamic') { }
+else if (analysis_mode == 'stubifier') {
+  targets = getTargetsFromCoverageReport(coverageReportPath);
+  functions = [...new Set(targets.map(item => path.join(__dirname, item)).map(buildHappyName))].map(item => {
+    let [path, line] = item.split('do_');
+    let info = line.split('_')
+    return path + 'do_' + info[0] + '_' + info[2]
+  })
+} else {
+  targets = getTargetsFromACG(callgraphpath, node_profpath, coverageReportPath);
+  functions = [...new Set(targets.map(item => path.join(__dirname, item)).map(buildHappyName))].map(item => {
+    let [path, line] = item.split('do_');
+    let info = line.split('_')
+    return path + 'do_' + info[0] + '_' + info[2]
+  })
+
 }
+targets.forEach(item => {
+  listedFiles.add(path.join(__dirname, getFileName(item)))
+})
+// let ddtargets = getTargetsFromCoverageReport(coverageReportPath);
+// let ddfunctions = ddtargets.map(buildHappyName);
+noCG = false;
+
 
 let zipFiles = false; // Currently don't ever do this.
 if (removeFunsPath) {
   removeFuns = getTargetsFromACG(removeFunsPath).map(buildHappyName);
-}
-// 动态分析
-if (uncoveredMode) {
-  let targets = getTargetsFromCoverageReport(coverageReportPath);
-  functions = targets.map(buildHappyName);
-  let all_listedFiles = targets.map(getFileName2);
-  all_listedFiles.forEach(element => {
-    if (listedFiles.indexOf(element) == -1)
-      listedFiles.push(element);
-  });
-  noCG = false;
-  // console.log(listedFiles);
-  // console.log(functions);
 }
 // console.log(path.join(__dirname,cur_dir, 'dep_list.txt'));
 depList = fs.readFileSync(path.join(__dirname, cur_dir, 'dep_list.txt'), 'utf-8').split("\n");
@@ -148,7 +158,7 @@ if (bundlerMode != "no") {
 else {
   // stubbing section; no bundling 
   if (fs.lstatSync(path.resolve(path.join(__dirname, cur_dir))).isDirectory()) {
-    let files = getAllFiles(path.resolve(path.join(__dirname, cur_dir)), recurseThroughDirs);
+    let files = getAllFiles(path.resolve(path.join(__dirname, cur_dir)), recurseThroughDirs,[], depList);
     files.forEach(function (file, index) {
       // console.log(file);
       // only stubify JS files
@@ -156,7 +166,7 @@ else {
       // console.log("decision: " + shouldStubbify(curPath, file, depList));
       // let curAbsPath: string = process.cwd() + curPath;
       if (shouldStubbify(curPath, file, depList)) { // don't even try to stub externs
-        if (noCG || listedFiles.indexOf(curPath) > -1) { // file is reachable, so only stubify functions
+        if (noCG || [...listedFiles].indexOf(curPath) > -1) { // file is reachable, so only stubify functions
           console.log("FUNCTION CASE: " + curPath);
           try {
             stubFunction(

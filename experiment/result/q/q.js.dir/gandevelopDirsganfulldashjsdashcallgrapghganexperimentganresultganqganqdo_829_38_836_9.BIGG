@@ -1,0 +1,9 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_829_38_836_9 = function () {
+  var inspected = inspect();
+  if (inspected.state === "pending" || inspected.state === "rejected") {
+    return promise;
+  }
+  return inspected.value;
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_829_38_836_9;

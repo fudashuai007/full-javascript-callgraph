@@ -1,0 +1,11 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1175_38_1183_9 = function (name, args) {
+  // Mark Miller proposes that post with no name should apply a
+  // promised function.
+  if (name === null || name === void 0) {
+    return value.apply(void 0, args);
+  } else {
+    return value[name].apply(value, args);
+  }
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1175_38_1183_9;

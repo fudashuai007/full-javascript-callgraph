@@ -1,0 +1,17 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_2051_48_2065_1 = function (nodeback) {
+  if (nodeback) {
+    this.then(function (value) {
+      Q.nextTick(function () {
+        nodeback(null, value);
+      });
+    }, function (error) {
+      Q.nextTick(function () {
+        nodeback(error);
+      });
+    });
+  } else {
+    return this;
+  }
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_2051_48_2065_1;

@@ -1,0 +1,14 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_675_47_686_1 = function () {
+  var self = this;
+  return function (error, value) {
+    if (error) {
+      self.reject(error);
+    } else if (arguments.length > 2) {
+      self.resolve(array_slice(arguments, 1));
+    } else {
+      self.resolve(value);
+    }
+  };
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_675_47_686_1;

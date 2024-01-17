@@ -1,0 +1,180 @@
+{
+  "system": [
+      "anon (q.js:{{:program}})",
+      "anon (q.js:{{module}})",
+      "Q (q.js:497:1:511:2)",
+      "reject (q.js:1135:1:1154:2)",
+      "flush (q.js:111:5:133:6)",
+      "anon (q.js:846:26:915:2)",
+      "defer (q.js:549:1:668:2)",
+      "anon (q.js:633:24:639:6)",
+      "anon (q.js:648:23:654:6)"
+  ],
+  "anon": [
+      "anon (q.js:29:2:79:2)",
+      "anon (q.js:79:4:2076:2)",
+      "captureLine (q.js:458:1:476:2)",
+      "anon (q.js:101:16:248:2)",
+      "uncurryThis (q.js:261:1:265:2)",
+      "resetUnhandledRejections (q.js:1063:1:1070:2)",
+      "deprecate (q.js:478:1:487:2)",
+      "requestTick (q.js:196:23:198:10)",
+      "anon (q.js:262:12:264:6)",
+      "defer (q.js:549:1:668:2)",
+      "nextTick (q.js:171:16:182:6)",
+      "anon (q.js:804:31:818:6)",
+      "_rejected (q.js:860:5:870:6)",
+      "anon (q.js:633:24:639:6)",
+      "Q (q.js:497:1:511:2)",
+      "become (q.js:613:5:630:6)",
+      "anon (q.js:877:30:884:10)",
+      "_fulfilled (q.js:852:5:858:6)",
+      "anon (q.js:561:31:573:6)",
+      "reject (q.js:1135:1:1154:2)",
+      "inspect (q.js:1190:16:1192:6)",
+      "inspect (q.js:1146:8:1148:6)",
+      "anon (q.js:648:23:654:6)"
+  ],
+  "anon (q.js:79:4:2076:2)": [
+      "Error (Native)(q.js:84:11:84:22)"
+  ],
+  "captureLine (q.js:458:1:476:2)": [
+      "Error (Native)(q.js:464:15:464:26)",
+      "split (Native)(q.js:466:21:466:40)",
+      "indexOf (Native)(q.js:467:25:467:46)"
+  ],
+  "captureLine (Native) (q.js:458:1:476:2)": [
+      "getFileNameAndLineNumber (q.js:420:1:439:2)"
+  ],
+  "getFileNameAndLineNumber (q.js:420:1:439:2)": [
+      "exec (Native)(q.js:423:20:423:67)",
+      "exec (Native)(q.js:429:20:429:63)",
+      "Number (Native)(q.js:431:30:431:49)"
+  ],
+  "anon (q.js:101:16:248:2)": [
+      "toString (Native)(q.js:185:9:185:27)"
+  ],
+  "Q (Native) (q.js:497:1:511:2)": [
+      "isPromiseAlike (q.js:1010:1:1012:2)",
+      "fulfill (q.js:1161:1:1193:2)",
+      "coerce (q.js:1200:1:1210:2)"
+  ],
+  "isPromiseAlike (Native) (q.js:1010:1:1012:2)": [
+      "isObject (q.js:349:1:351:2)"
+  ],
+  "isObject (q.js:349:1:351:2)": [
+      "Object (Native)(q.js:350:22:350:35)"
+  ],
+  "fulfill (Native) (q.js:1161:1:1193:2)": [
+      "Promise (q.js:788:1:840:2)"
+  ],
+  "Promise (q.js:788:1:840:2)": [
+      "create (Native)(q.js:802:19:802:51)"
+  ],
+  "Promise (Native) (q.js:788:1:840:2)": [
+      "inspect (q.js:1190:16:1192:6)",
+      "inspect (q.js:1146:8:1148:6)"
+  ],
+  "reject (Native) (q.js:1135:1:1154:2)": [
+      "Promise (q.js:788:1:840:2)",
+      "trackRejection (q.js:1072:1:1091:2)"
+  ],
+  "trackRejection (Native) (q.js:1072:1:1091:2)": [
+      "anon (q.js:240:25:246:6)",
+      "anon (q.js:829:27:836:10)",
+      "anon (q.js:842:30:844:2)"
+  ],
+  "anon (q.js:240:25:246:6)": [
+      "push (Native)(q.js:241:9:241:30)"
+  ],
+  "trackRejection (q.js:1072:1:1091:2)": [
+      "push (Native)(q.js:1085:5:1085:38)",
+      "push (Native)(q.js:1089:9:1089:54)",
+      "push (Native)(q.js:1087:9:1087:44)"
+  ],
+  "flush (q.js:111:5:133:6)": [
+      "pop (Native)(q.js:129:20:129:36)"
+  ],
+  "flush (Native) (q.js:111:5:133:6)": [
+      "runSingle (q.js:135:5:169:6)"
+  ],
+  "runSingle (Native) (q.js:135:5:169:6)": [
+      "anon (q.js:1077:29:1082:10)",
+      "anon (q.js:876:16:892:6)",
+      "anon (q.js:1101:33:1107:14)",
+      "anon (q.js:623:24:625:14)",
+      "anon (q.js:569:24:571:14)",
+      "anon (q.js:1202:16:1208:6)"
+  ],
+  "anon (q.js:262:12:264:6)": [
+      "apply (Native)(q.js:263:16:263:40)"
+  ],
+  "anon (q.js:1077:29:1082:10)": [
+      "push (Native)(q.js:1080:17:1080:58)"
+  ],
+  "defer (q.js:549:1:668:2)": [
+      "create (Native)(q.js:558:20:558:50)",
+      "create (Native)(q.js:559:19:559:51)"
+  ],
+  "anon (q.js:804:31:818:6)": [
+      "apply (Native)(q.js:808:26:808:61)"
+  ],
+  "apply (Native) (q.js:808:26:808:61)": [
+      "when (q.js:1137:17:1143:10)",
+      "when (q.js:1163:17:1165:10)"
+  ],
+  "when (Native) (q.js:1137:17:1143:10)": [
+      "untrackRejection (q.js:1093:1:1112:2)",
+      "anon (q.js:884:21:891:10)"
+  ],
+  "untrackRejection (Native) (q.js:1093:1:1112:2)": [
+      "anon (q.js:262:12:264:6)",
+      "anon (q.js:240:25:246:6)"
+  ],
+  "untrackRejection (q.js:1093:1:1112:2)": [
+      "splice (Native)(q.js:1109:9:1109:42)",
+      "splice (Native)(q.js:1110:9:1110:39)"
+  ],
+  "_rejected (Native) (q.js:860:5:870:6)": [
+      "makeStackTraceLong (q.js:378:1:400:2)",
+      "reject (q.js:1135:1:1154:2)",
+      "anon (q.js:846:26:915:2)",
+      "defer (q.js:549:1:668:2)"
+  ],
+  "become (Native) (q.js:613:5:630:6)": [
+      "anon (q.js:262:12:264:6)"
+  ],
+  "nextTick (Native) (q.js:171:16:182:6)": [
+      "requestTick (q.js:196:23:198:10)"
+  ],
+  "anon (q.js:561:31:573:6)": [
+      "push (Native)(q.js:564:13:564:32)",
+      "push (Native)(q.js:566:17:566:52)"
+  ],
+  "apply (Native) (q.js:263:16:263:40)": [
+      "anon (q.js:622:32:626:10)"
+  ],
+  "anon (q.js:623:24:625:14)": [
+      "apply (Native)(q.js:624:17:624:70)"
+  ],
+  "apply (Native) (q.js:624:17:624:70)": [
+      "anon (q.js:804:31:818:6)",
+      "anon (q.js:561:31:573:6)"
+  ],
+  "anon (q.js:569:24:571:14)": [
+      "apply (Native)(q.js:570:17:570:77)"
+  ],
+  "apply (Native) (q.js:570:17:570:77)": [
+      "anon (q.js:804:31:818:6)",
+      "anon (q.js:561:31:573:6)"
+  ],
+  "_fulfilled (Native) (q.js:852:5:858:6)": [
+      "reject (q.js:1135:1:1154:2)",
+      "anon (q.js:846:26:915:2)",
+      "defer (q.js:549:1:668:2)"
+  ],
+  "coerce (Native) (q.js:1200:1:1210:2)": [
+      "defer (q.js:549:1:668:2)",
+      "nextTick (q.js:171:16:182:6)"
+  ]
+}

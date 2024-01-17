@@ -1,0 +1,13 @@
+const fs_uniqID = require('fs');
+const zlib_uniqID = require('zlib');
+console.log("[STUBBIFIER METRICS] FILE STUB HAS BEEN EXPANDED: d:\developDirs\full-js-callgrapgh\experiment\result\q\Gruntfile.js");
+if (!fs_uniqID.existsSync("d:\developDirs\full-js-callgrapgh\experiment\result\q\Gruntfile.js.BIGG")) {
+  var gunzip = zlib_uniqID.gunzipSync;
+  var inp = fs_uniqID.createReadStream("d:\developDirs\full-js-callgrapgh\experiment\result\q\Gruntfile.js.BIGG.gz");
+  var out = fs_uniqID.createWriteStream("d:\developDirs\full-js-callgrapgh\experiment\result\q\Gruntfile.js.BIGG");
+  inp.pipe(gunzip).pipe(out);
+}
+let fileContents = fs_uniqID.readFileSync("d:\developDirs\full-js-callgrapgh\experiment\result\q\Gruntfile.js.BIGG", 'utf-8');
+let result_uniqID = eval(fileContents);
+module.exports = result_uniqID;
+module.exports;

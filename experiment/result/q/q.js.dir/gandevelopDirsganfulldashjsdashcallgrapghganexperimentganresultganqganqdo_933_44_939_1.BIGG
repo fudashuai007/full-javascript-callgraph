@@ -1,0 +1,8 @@
+let gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_933_44_939_1 = function (callback) {
+  callback = Q(callback);
+  return this.then(function (value) {
+    return callback.fcall(value).thenResolve(value);
+  });
+}; 
+
+gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_933_44_939_1;
