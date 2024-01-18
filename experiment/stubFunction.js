@@ -298,8 +298,7 @@ function stubFunction(
         var stubFileBody = "let " + fctName + " = " + fctBody+ "; \n\n" + fctName + ";";
         // TODO: currently in safeEvalMode we check to see if console.log is eval
         // if (testingMode) {
-        //     console.log(`[STUBBIFIER METRICS] function stubbed: ${fctName} --- ${filename}`);
-        //     stubFileBody = `console.log("[STUBBIFIER METRICS] EXPANDED STUB HAS BEEN CALLED: ${fctName} --- ${filename}");` + stubFileBody;
+        //     stubFileBody = `fs.writeFileSync(${filename+'.log'},${fctName});` + stubFileBody;
         // }
 
         fs.writeFileSync(filename +".dir/" + fctName +".BIGG", stubFileBody);

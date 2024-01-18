@@ -362,10 +362,15 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
     }
   }
   function filterStackString(stackString) {
-    let toExec = eval(stubs.getCode("gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_402_40_413_1"));
-    toExec = stubs.copyFunctionProperties(filterStackString, toExec);
-    filterStackString = toExec;
-    return toExec.apply(this, arguments);
+    var lines = stackString.split("\n");
+    var desiredLines = [];
+    for (var i = 0; i < lines.length; ++i) {
+      var line = lines[i];
+      if (!isInternalFrame(line) && !isNodeFrame(line) && line) {
+        desiredLines.push(line);
+      }
+    }
+    return desiredLines.join("\n");
   }
   function isNodeFrame(stackLine) {
     return stackLine.indexOf("(module.js:") !== -1 || stackLine.indexOf("(node.js:") !== -1;
@@ -391,10 +396,13 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
     }
   }
   function isInternalFrame(stackLine) {
-    let toExec = eval(stubs.getCode("gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_441_36_454_1"));
-    toExec = stubs.copyFunctionProperties(isInternalFrame, toExec);
-    isInternalFrame = toExec;
-    return toExec.apply(this, arguments);
+    var fileNameAndLineNumber = getFileNameAndLineNumber(stackLine);
+    if (!fileNameAndLineNumber) {
+      return false;
+    }
+    var fileName = fileNameAndLineNumber[0];
+    var lineNumber = fileNameAndLineNumber[1];
+    return fileName === qFileName && lineNumber >= qStartingLine && lineNumber <= qEndingLine;
   }
 
   // discover own file name and line number range for filtering stack
@@ -677,16 +685,18 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
     return Q(x).join(y);
   };
   Promise.prototype.join = function (that) {
-    let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_742_41_751_1";
-    let toExecString = stubs.getStub(fctID);
-    if (!toExecString) {
-      toExecString = stubs.getCode(fctID);
-      stubs.setStub(fctID, toExecString);
-    }
-    let toExec = eval(toExecString);
-    toExec = stubs.copyFunctionProperties(this, toExec);
-    toExec.stubbifierExpandedStub = true;
-    return toExec.apply(this, arguments);
+    return Q([this, that]).spread(function (x, y) {
+      let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_743_50_750_5";
+      let toExecString = stubs.getStub(fctID);
+      if (!toExecString) {
+        toExecString = stubs.getCode(fctID);
+        stubs.setStub(fctID, toExecString);
+      }
+      let toExec = eval(toExecString);
+      toExec = stubs.copyFunctionProperties(this, toExec);
+      toExec.stubbifierExpandedStub = true;
+      return toExec.apply(this, arguments);
+    });
   };
 
   /**
@@ -755,11 +765,16 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
         promise.exception = inspected.reason;
       }
       promise.valueOf = function () {
-        var inspected = inspect();
-        if (inspected.state === "pending" || inspected.state === "rejected") {
-          return promise;
+        let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_829_38_836_9";
+        let toExecString = stubs.getStub(fctID);
+        if (!toExecString) {
+          toExecString = stubs.getCode(fctID);
+          stubs.setStub(fctID, toExecString);
         }
-        return inspected.value;
+        let toExec = eval(toExecString);
+        toExec = stubs.copyFunctionProperties(this, toExec);
+        toExec.stubbifierExpandedStub = true;
+        return toExec.apply(this, arguments);
       };
     }
     return promise;
@@ -795,19 +810,16 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
       return typeof progressed === "function" ? progressed(value) : value;
     }
     Q.nextTick(function () {
-      self.promiseDispatch(function (value) {
-        if (done) {
-          return;
-        }
-        done = true;
-        deferred.resolve(_fulfilled(value));
-      }, "when", [function (exception) {
-        if (done) {
-          return;
-        }
-        done = true;
-        deferred.resolve(_rejected(exception));
-      }]);
+      let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_876_27_892_5";
+      let toExecString = stubs.getStub(fctID);
+      if (!toExecString) {
+        toExecString = stubs.getCode(fctID);
+        stubs.setStub(fctID, toExecString);
+      }
+      let toExec = eval(toExecString);
+      toExec = stubs.copyFunctionProperties(this, toExec);
+      toExec.stubbifierExpandedStub = true;
+      return toExec.apply(this, arguments);
     });
 
     // Progress propagator need to be attached in the current tick.
@@ -995,23 +1007,10 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
     }
   }
   function untrackRejection(promise) {
-    if (!trackUnhandledRejections) {
-      return;
-    }
-    var at = array_indexOf(unhandledRejections, promise);
-    if (at !== -1) {
-      if (typeof process === "object" && typeof process.emit === "function") {
-        Q.nextTick.runAfter(function () {
-          var atReport = array_indexOf(reportedUnhandledRejections, promise);
-          if (atReport !== -1) {
-            process.emit("rejectionHandled", unhandledReasons[at], promise);
-            reportedUnhandledRejections.splice(atReport, 1);
-          }
-        });
-      }
-      unhandledRejections.splice(at, 1);
-      unhandledReasons.splice(at, 1);
-    }
+    let toExec = eval(stubs.getCode("gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1093_35_1112_1"));
+    toExec = stubs.copyFunctionProperties(untrackRejection, toExec);
+    untrackRejection = toExec;
+    return toExec.apply(this, arguments);
   }
   Q.resetUnhandledRejections = resetUnhandledRejections;
   Q.getUnhandledReasons = function () {
@@ -1034,11 +1033,16 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
   function reject(reason) {
     var rejection = Promise({
       "when": function (rejected) {
-        // note that the error has been handled
-        if (rejected) {
-          untrackRejection(this);
+        let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1137_36_1143_9";
+        let toExecString = stubs.getStub(fctID);
+        if (!toExecString) {
+          toExecString = stubs.getCode(fctID);
+          stubs.setStub(fctID, toExecString);
         }
-        return rejected ? rejected(reason) : this;
+        let toExec = eval(toExecString);
+        toExec = stubs.copyFunctionProperties(this, toExec);
+        toExec.stubbifierExpandedStub = true;
+        return toExec.apply(this, arguments);
       }
     }, function fallback() {
       return this;
@@ -1107,11 +1111,16 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
   function coerce(promise) {
     var deferred = defer();
     Q.nextTick(function () {
-      try {
-        promise.then(deferred.resolve, deferred.reject, deferred.notify);
-      } catch (exception) {
-        deferred.reject(exception);
+      let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1202_27_1208_5";
+      let toExecString = stubs.getStub(fctID);
+      if (!toExecString) {
+        toExecString = stubs.getCode(fctID);
+        stubs.setStub(fctID, toExecString);
       }
+      let toExec = eval(toExecString);
+      toExec = stubs.copyFunctionProperties(this, toExec);
+      toExec.stubbifierExpandedStub = true;
+      return toExec.apply(this, arguments);
     });
     return deferred.promise;
   }
@@ -1447,10 +1456,18 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
   // http://wiki.ecmascript.org/doku.php?id=strawman:concurrency&rev=1308776521#allfulfilled
   Q.all = all;
   function all(promises) {
-    let toExec = eval(stubs.getCode("gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1581_23_1614_1"));
-    toExec = stubs.copyFunctionProperties(all, toExec);
-    all = toExec;
-    return toExec.apply(this, arguments);
+    return when(promises, function (promises) {
+      let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1582_46_1613_5";
+      let toExecString = stubs.getStub(fctID);
+      if (!toExecString) {
+        toExecString = stubs.getCode(fctID);
+        stubs.setStub(fctID, toExecString);
+      }
+      let toExec = eval(toExecString);
+      toExec = stubs.copyFunctionProperties(this, toExec);
+      toExec.stubbifierExpandedStub = true;
+      return toExec.apply(this, arguments);
+    });
   }
   Promise.prototype.all = function () {
     return all(this);
@@ -1624,27 +1641,16 @@ let stubs = new (require('d:\developDirs\full-js-callgrapgh/stubbifier_cjs.cjs')
     return Q(object).timeout(ms, error);
   };
   Promise.prototype.timeout = function (ms, error) {
-    var deferred = defer();
-    var timeoutId = setTimeout(function () {
-      let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1844_43_1850_5";
-      let toExecString = stubs.getStub(fctID);
-      if (!toExecString) {
-        toExecString = stubs.getCode(fctID);
-        stubs.setStub(fctID, toExecString);
-      }
-      let toExec = eval(toExecString);
-      toExec = stubs.copyFunctionProperties(this, toExec);
-      toExec.stubbifierExpandedStub = true;
-      return toExec.apply(this, arguments);
-    }, ms);
-    this.then(function (value) {
-      clearTimeout(timeoutId);
-      deferred.resolve(value);
-    }, function (exception) {
-      clearTimeout(timeoutId);
-      deferred.reject(exception);
-    }, deferred.notify);
-    return deferred.promise;
+    let fctID = "gandevelopDirsganfulldashjsdashcallgrapghganexperimentganresultganqganqdo_1842_49_1861_1";
+    let toExecString = stubs.getStub(fctID);
+    if (!toExecString) {
+      toExecString = stubs.getCode(fctID);
+      stubs.setStub(fctID, toExecString);
+    }
+    let toExec = eval(toExecString);
+    toExec = stubs.copyFunctionProperties(this, toExec);
+    toExec.stubbifierExpandedStub = true;
+    return toExec.apply(this, arguments);
   };
 
   /**

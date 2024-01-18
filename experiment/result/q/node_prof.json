@@ -1,5 +1,5 @@
 {
-  "system": [
+  "system (Native)": [
       "anon (q.js:{{:program}})",
       "anon (q.js:{{module}})",
       "Q (q.js:497:1:511:2)",
@@ -10,7 +10,7 @@
       "anon (q.js:633:24:639:6)",
       "anon (q.js:648:23:654:6)"
   ],
-  "anon": [
+  "anon (Native)": [
       "anon (q.js:29:2:79:2)",
       "anon (q.js:79:4:2076:2)",
       "captureLine (q.js:458:1:476:2)",

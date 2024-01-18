@@ -28,14 +28,8 @@ function buildHappyName(sad) {
 }
 // 生成函数id
 function generateNodeUID(n, filename, coverageMode) {
-  // console.log(n);
-  // acorn/src/location.js:<12,12>--<18,1>
   let locString;
-  // let  startCol=colNum2V8(n.loc.start.line,n.loc.start.column,filename,'start')
-  // let endCol =colNum2V8(n.body.loc.end.line,n.body.loc.end.column,filename,'end')
   locString = "<" + n.body.loc.start.line + "," + n.body.loc.start.column + ">--<" + n.body.loc.end.line + "," + n.body.loc.end.column + ">";
-
-
   return buildHappyName(filename + ":" + locString);
 }
 
@@ -68,12 +62,13 @@ function colNum2V8(ln, col, bdir, type) {
 
 }
 // 从一个特定格式的调用图文件中提取目标信息
-function getTargetsFromACG(filepath, profpath, coverpath) {
+function getTargetsFromACG(filepath, profpath, coverpath,cur_path) {
   let listFunc = []
   // 静态结果
   const static_result = path.join(__dirname, filepath)
-
-
+  let pattern = /<(\d+),(\d+)>--<(\d+),(\d+)>/;
+  let pattern2 = /(\d+):(\d+):(\d+):(\d+)/;
+ 
   // 读取指定路径下的文件，并按行拆分为数组 unprocessedCG
   let unprocessedCG = fs.readFileSync(static_result, 'utf-8').split('\n');
   /* 移除收尾括号 */
@@ -82,17 +77,41 @@ function getTargetsFromACG(filepath, profpath, coverpath) {
 
   unprocessedCG = unprocessedCG.map(item => {
     item = item.replace(/\s+/g, '')
+    let [source,target] = item.split('->').map(item=>item.match(pattern))
+    source =source.input.split(':')[0]+'<'+source[1]+',fake>--<'+ source[3]+','+ source[4]+'>'
+    target =target.input.split(':')[0]+'<'+target[1]+',fake>--<'+ target[3]+','+ target[4]+'>'
+    item=source+'->'+target
     return item
   })
 
   let visitedItem = new Set()
   const data = JSON.parse(fs.readFileSync(path.join(__dirname, profpath), 'utf8'));
+  let dynamic_result = []
+  for(const key in data){
+    let start
+    if(key =='system (Native)' || key =='anon (Native)'){
+      start='/'+cur_path+'/:'+'1:0:1:0'
+    }else{  
+        start ='/'+cur_path+'/:'+ key.split(' ')[key.includes('Native')?2:1].replace(/\(|\)/g,'').replace(':','\/')  
+    }
+    let matches = start.match(pattern2)
+    start= matches.input.split(':')[0]+'<'+matches[1]+',fake>--<'+ matches[3]+','+ matches[4]+'>'
+     
+    data[key].forEach(item=>{
+      if(!item.includes('Native') && !item.includes(':{')){
+        item ='/'+cur_path+'/'+ item.split(' ')[item.includes('Native')?2:1].replace(/\(|\)/g,'').replace(':','\/')
+        matches = item.match(pattern2)
+        item = matches.input.split(':')[0]+'<'+matches[1]+',fake>--<'+ matches[3]+','+ matches[4]+'>'
+        dynamic_result.push(start+'->'+item)
+      }
+    })
+  }
 
   // node_prof结果
-  let node_prof_global = data['system'].filter(item => !item.includes(':{')).concat(data['anon'])
+  // let node_prof_global = data['system'].filter(item => !item.includes(':{')).concat(data['anon'])
 
-  // coverage结果
-  let cover_data = getTargetsFromCoverageReport(coverpath)
+  // // coverage结果
+  // let cover_data = getTargetsFromCoverageReport(coverpath)
 
   // 返回函数调用结果列表
   let targets = []
@@ -107,31 +126,31 @@ function getTargetsFromACG(filepath, profpath, coverpath) {
   }))
 
 
-  node_prof_global.forEach(item1 => {
-    let startRow = item1.split(':')[1]
-    let endRow = item1.split(':')[3]
-    let endCol = Number(item1.split(':')[4].split(')')[0]) - 1
-    let res = unprocessedCG.filter((item) => {
-      item = item.trim(' ').trim('"')
-      let pattern = /<(\d+),(\d+)>--<(\d+),(\d+)>/;
-      let matchRes = item.split('->')[0].match(pattern)
-      let sg_start_row = matchRes[1], sg_end_row = matchRes[3], sg_end_column = matchRes[4]
-      if (startRow == sg_start_row && endRow == sg_end_row && endCol == sg_end_column) {
-        visitedItem.add(item)
-        return true
-      }
-    })
-    listFunc = listFunc.concat(res)
-  })
+  // dynamic_result.forEach(item1 => {
+  //   let startRow = item1.split(':')[1]
+  //   let endRow = item1.split(':')[3]
+  //   let endCol = Number(item1.split(':')[4].split(')')[0]) - 1
+  //   let res = unprocessedCG.filter((item) => {
+  //     item = item.trim(' ').trim('"')
+  //     let pattern = /<(\d+),(\d+)>--<(\d+),(\d+)>/;
+  //     let matchRes = item.split('->')[0].match(pattern)
+  //     let sg_start_row = matchRes[1], sg_end_row = matchRes[3], sg_end_column = matchRes[4]
+  //     if (startRow == sg_start_row && endRow == sg_end_row && endCol == sg_end_column) {
+  //       visitedItem.add(item)
+  //       return true
+  //     }
+  //   })
+  //   listFunc = listFunc.concat(res)
+  // })
   listFunc.forEach(item => {
     let target = item.split('->')[1]
     findChildrenFunction(unprocessedCG, listFunc, target, visitedItem)
 
   })
 
-  cover_data.forEach(item => {
-    findChildrenFunction(unprocessedCG, listFunc, item, visitedItem)
-  })
+  // cover_data.forEach(item => {
+  //   findChildrenFunction(unprocessedCG, listFunc, item, visitedItem)
+  // })
   listFunc.forEach(line => {
     let split_line = line.trim(' ').trim('"')
     let [source, target] = split_line.split('->')

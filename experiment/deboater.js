@@ -58,7 +58,7 @@ let depList;
 // 合并动态分析与静态分析结果
 let targets = []
 
-let analysis_mode = 'stubifier'
+let analysis_mode = 'hibrid' // stubifier
 if (analysis_mode == 'static') { }
 else if (analysis_mode == 'dynamic') { }
 else if (analysis_mode == 'stubifier') {
@@ -69,7 +69,7 @@ else if (analysis_mode == 'stubifier') {
     return path + 'do_' + info[0] + '_' + info[2]
   })
 } else {
-  targets = getTargetsFromACG(callgraphpath, node_profpath, coverageReportPath);
+  targets = getTargetsFromACG(callgraphpath, node_profpath, coverageReportPath,cur_dir);
   functions = [...new Set(targets.map(item => path.join(__dirname, item)).map(buildHappyName))].map(item => {
     let [path, line] = item.split('do_');
     let info = line.split('_')
